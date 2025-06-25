@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/theme/theme.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:amora/core/theme/theme.dart';
+import 'package:amora/features/authentication/data/models/user_model.dart';
+import 'package:amora/features/authentication/presentation/screens/registration_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
+  final directory = await getApplicationDocumentsDirectory();
+  await Hive.initFlutter(directory.path);
+  Hive.registerAdapter(UserModelAdapter());
+  await Hive.openBox<UserModel>('users');
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -15,38 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'Amora',
       theme: AppTheme.lightTheme,
       builder: AppTheme.romanticTransitionBuilder,
-      home: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Welcome to Our Romantic Memories',
-                    style: AppTheme.lightTheme.textTheme.displayLarge,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Test Button'),
-              ),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32),
-                child: TextField(
-                  decoration: InputDecoration(
-                    labelText: 'Test Input',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: const RegistrationScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

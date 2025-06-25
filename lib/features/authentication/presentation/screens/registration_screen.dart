@@ -397,6 +397,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                   side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                                 ),
                                 elevation: 4,
+                                
                                 shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
                               ),
                               child: Row(

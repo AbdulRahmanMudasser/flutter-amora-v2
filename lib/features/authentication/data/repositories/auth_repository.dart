@@ -37,6 +37,7 @@ class AuthRepository {
         role: role,
         securityQuestion: securityQuestion,
         securityAnswer: securityAnswer,
+        secretWord: secretWord,
       );
       await _userBox.put(id, user);
       await _secureStorage.write(key: '${id}_$_passwordKey', value: password);

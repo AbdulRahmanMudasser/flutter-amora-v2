@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amora/core/theme/theme.dart';
 import 'package:amora/features/authentication/domain/auth_provider.dart';
+import 'package:amora/features/authentication/presentation/screens/login_screen.dart';
 
 class OtpVerificationScreen extends ConsumerStatefulWidget {
   final String email;
@@ -20,7 +21,6 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   @override
   void initState() {
     super.initState();
-    // Log entry for debugging
     debugPrint('OtpVerificationScreen loaded with email: ${widget.email}, otp: ${widget.otp}');
   }
 
@@ -35,10 +35,10 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     final authState = ref.watch(authStateProvider);
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final horizontalPadding = screenWidth * 0.02; // 2% margins
-    final verticalSpacing = screenHeight * 0.015; // 1.5% spacing
-    final fieldWidthFraction = screenWidth > 600 ? 0.85 : 0.98; // 85% tablets, 98% mobile
-    final fontScaleFactor = screenWidth > 600 ? 1.2 : 0.85; // Font scaling
+    final horizontalPadding = screenWidth * 0.02;
+    final verticalSpacing = screenHeight * 0.015;
+    final fieldWidthFraction = screenWidth > 600 ? 0.85 : 0.98;
+    final fontScaleFactor = screenWidth > 600 ? 1.2 : 0.85;
 
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
@@ -64,7 +64,6 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Header text
                     Padding(
                       padding: EdgeInsets.only(top: verticalSpacing * 2, bottom: verticalSpacing),
                       child: Text(
@@ -84,7 +83,6 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    // Romantic header image
                     Container(
                       margin: EdgeInsets.only(bottom: verticalSpacing * 2),
                       constraints: BoxConstraints(
@@ -122,7 +120,6 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         ),
                       ),
                     ),
-                    // Decorative divider
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -136,7 +133,6 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                       ],
                     ),
                     SizedBox(height: verticalSpacing * 2),
-                    // Subheader
                     Text(
                       'Enter the OTP',
                       style: Theme.of(context).textTheme.displayMedium?.copyWith(
@@ -226,8 +222,10 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('OTP verified successfully!')),
                                     );
-                                    // TODO: Navigate to HomeScreen or next screen
-                                    Navigator.pop(context); // Temporary for testing
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                                    );
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Invalid OTP')),

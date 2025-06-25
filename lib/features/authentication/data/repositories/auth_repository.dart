@@ -48,7 +48,7 @@ class AuthRepository {
   }
 
   Future<String> generateOtp(String email) async {
-    // Simulate OTP generation (offline app)
+    
     final random = Random().nextInt(900000) + 100000;
     final otp = random.toString();
     await _secureStorage.write(key: '${email}_otp', value: otp);

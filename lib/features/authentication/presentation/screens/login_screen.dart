@@ -5,6 +5,7 @@ import 'package:amora/features/authentication/domain/auth_provider.dart';
 import 'package:amora/features/authentication/presentation/widgets/custom_text_field.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:amora/features/authentication/presentation/screens/home_screen.dart';
+import 'package:amora/features/authentication/presentation/screens/registration_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -65,7 +66,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 FutureBuilder<String?>(
                   future: ref.read(authStateProvider.notifier).getSecurityQuestion(_emailController.text),
                   builder: (context, snapshot) {
@@ -84,7 +85,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   },
                 ),
                 if (_securityQuestion != null) ...[
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   CustomTextField(
                     label: 'Security Answer',
                     controller: _securityAnswerController,
@@ -103,7 +104,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(
+              child: const Text(
                 'Cancel',
                 style: TextStyle(color: AppTheme.roseGold),
               ),
@@ -130,7 +131,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                   backgroundColor: AppTheme.roseGold,
                   foregroundColor: AppTheme.creamWhite,
                 ),
-                child: Text(
+                child: const Text(
                   'Submit',
                   style: TextStyle(fontFamily: 'Montserrat'),
                 ),
@@ -160,7 +161,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             end: Alignment.bottomCenter,
             colors: [
               AppTheme.creamWhite,
-              AppTheme.softPink.withOpacity(0.3),
+              AppTheme.softPink.withValues(alpha: 0.3),
             ],
           ),
         ),
@@ -186,7 +187,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withOpacity(0.3),
+                              color: AppTheme.roseGold.withValues(alpha: 0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
@@ -205,7 +206,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withOpacity(0.3),
+                            color: AppTheme.softPink.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -215,12 +216,12 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(18),
                         child: Image.asset(
-                          'assets/images/romantic_header.png',
+                          'assets/images/login.jpg',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            print('Error loading image: $error');
+                            debugPrint('Error loading image: $error');
                             return Container(
-                              color: AppTheme.softPink.withOpacity(0.2),
+                              color: AppTheme.softPink.withValues(alpha: 0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -231,7 +232,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ),
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.favorite, size: 20, color: AppTheme.roseGold),
@@ -252,7 +253,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         shadows: [
                           Shadow(
                             blurRadius: 3,
-                            color: AppTheme.roseGold.withOpacity(0.3),
+                            color: AppTheme.roseGold.withValues(alpha: 0.3),
                             offset: const Offset(1, 1),
                           ),
                         ],
@@ -318,18 +319,18 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                 labelText: 'Role',
                                 prefixIcon: Icon(Icons.favorite_border, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withOpacity(0.2),
+                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: AppTheme.deepRose, width: 2),
+                                  borderSide: const BorderSide(color: AppTheme.deepRose, width: 2),
                                 ),
                               ),
                               value: _selectedRole,
@@ -401,6 +402,21 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                   }
                                 }
                               },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppTheme.roseGold,
+                                foregroundColor: AppTheme.creamWhite,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.1,
+                                  vertical: screenHeight * 0.02,
+                                ),
+                                minimumSize: Size(double.infinity, screenHeight * 0.05),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
+                                ),
+                                elevation: 4,
+                                shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
+                              ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -409,7 +425,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                     size: 18 * fontScaleFactor,
                                     color: AppTheme.creamWhite,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
                                     authState.isLoading ? 'Logging in...' : 'Login',
                                     style: TextStyle(
@@ -421,21 +437,40 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ],
                               ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.roseGold,
-                                foregroundColor: AppTheme.creamWhite,
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.1,
-                                  vertical: screenHeight * 0.02,
+                            ),
+                          ),
+                          SizedBox(height: verticalSpacing),
+                          FractionallySizedBox(
+                            widthFactor: fieldWidthFraction,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Don\'t have an account?',
+                                  style: TextStyle(
+                                    fontFamily: 'Montserrat',
+                                    fontSize: 16 * fontScaleFactor,
+                                    color: AppTheme.deepRose,
+                                  ),
                                 ),
-                                minimumSize: Size(double.infinity, screenHeight * 0.08),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(color: AppTheme.deepRose, width: 1.5),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const RegistrationScreen()),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Sign Up',
+                                    style: TextStyle(
+                                      fontFamily: 'Montserrat',
+                                      fontSize: 16 * fontScaleFactor,
+                                      color: AppTheme.roseGold,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                                 ),
-                                elevation: 4,
-                                shadowColor: AppTheme.softPink.withOpacity(0.4),
-                              ),
+                              ],
                             ),
                           ),
                         ],

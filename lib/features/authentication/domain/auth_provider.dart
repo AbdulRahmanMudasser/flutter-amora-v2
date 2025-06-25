@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -60,10 +61,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       final random = Random();
       final otp = (100000 + random.nextInt(900000)).toString();
       await _secureStorage.write(key: 'otp_$email', value: otp);
-      print('Generated OTP for $email: $otp');
+      debugPrint('Generated OTP for $email: $otp');
       return otp;
     } catch (e) {
-      print('Error generating OTP: $e');
+      debugPrint('Error generating OTP: $e');
       return '000000';
     }
   }
@@ -77,7 +78,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       }
       return isValid;
     } catch (e) {
-      print('Error verifying OTP: $e');
+      debugPrint('Error verifying OTP: $e');
       return false;
     }
   }
@@ -116,7 +117,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       );
       return user.securityQuestion;
     } catch (e) {
-      print('Error fetching security question: $e');
+      debugPrint('Error fetching security question: $e');
       return null;
     }
   }
@@ -129,7 +130,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       );
       return await _secureStorage.read(key: 'password_${user.id}');
     } catch (e) {
-      print('Error recovering password: $e');
+      debugPrint('Error recovering password: $e');
       return null;
     }
   }

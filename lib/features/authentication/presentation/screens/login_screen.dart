@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:amora/core/theme/theme.dart';
 import 'package:amora/features/authentication/domain/auth_provider.dart';
+import 'package:amora/features/authentication/presentation/screens/registration_screen.dart';
 import 'package:amora/features/authentication/presentation/widgets/custom_text_field.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:amora/features/authentication/presentation/screens/home_screen.dart';
-import 'package:amora/features/authentication/presentation/screens/registration_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../dashboard/presentation/screens/main_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -103,7 +103,12 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Cancelled')),
+                );
+              },
               child: const Text(
                 'Cancel',
                 style: TextStyle(color: AppTheme.roseGold),
@@ -121,7 +126,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          password != null ? 'Password: $password (for testing)' : 'Invalid answer',
+                          password != null ? 'Password: $password' : 'Invalid answer',
                         ),
                       ),
                     );
@@ -155,14 +160,12 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.creamWhite,
-              AppTheme.softPink.withValues(alpha: 0.3),
-            ],
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/backgrounds/bg-1.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.3,
           ),
         ),
         child: LayoutBuilder(
@@ -187,12 +190,15 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withValues(alpha: 0.3),
+                              color: AppTheme.roseGold.withOpacity(0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
                         ),
                         textAlign: TextAlign.center,
+                        textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Welcome Back, Love')
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
                       ),
                     ),
                     Container(
@@ -206,7 +212,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withValues(alpha: 0.3),
+                            color: AppTheme.softPink.withOpacity(0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -221,7 +227,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           errorBuilder: (context, error, stackTrace) {
                             debugPrint('Error loading image: $error');
                             return Container(
-                              color: AppTheme.softPink.withValues(alpha: 0.2),
+                              color: AppTheme.softPink.withOpacity(0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -253,12 +259,15 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         shadows: [
                           Shadow(
                             blurRadius: 3,
-                            color: AppTheme.roseGold.withValues(alpha: 0.3),
+                            color: AppTheme.roseGold.withOpacity(0.3),
                             offset: const Offset(1, 1),
                           ),
                         ],
                       ),
                       textAlign: TextAlign.center,
+                      textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Sign In to Your Story')
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
                     ),
                     SizedBox(height: verticalSpacing * 2),
                     Form(
@@ -319,7 +328,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                 labelText: 'Role',
                                 prefixIcon: Icon(Icons.favorite_border, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                                fillColor: AppTheme.softPink.withOpacity(0.2),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
@@ -383,6 +392,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                               onPressed: authState.isLoading
                                   ? null
                                   : () async {
+                                debugPrint('Attempting login with email: ${_emailController.text}');
                                 if (_formKey.currentState!.validate() && _selectedRole != null) {
                                   final isAuthenticated = await ref.read(authStateProvider.notifier).login(
                                     email: _emailController.text,
@@ -391,15 +401,26 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                     role: _selectedRole!,
                                   );
                                   if (isAuthenticated) {
+                                    debugPrint('Login successful, navigating to MainScreen');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Login successful!')),
+                                    );
                                     Navigator.pushReplacement(
                                       context,
-                                      MaterialPageRoute(builder: (context) => const HomeScreen()),
+                                      MaterialPageRoute(
+                                        builder: (context) => MainScreen(
+                                          initialEmail: _emailController.text,
+                                        ),
+                                      ),
                                     );
                                   } else {
+                                    debugPrint('Login failed');
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Invalid credentials')),
                                     );
                                   }
+                                } else {
+                                  debugPrint('Form validation failed');
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -415,7 +436,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                   side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                                 ),
                                 elevation: 4,
-                                shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
+                                shadowColor: AppTheme.softPink.withOpacity(0.4),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -455,7 +476,11 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.pushReplacement(
+                                    debugPrint('Navigating to RegistrationScreen');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Navigating to Sign Up')),
+                                    );
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(builder: (context) => const RegistrationScreen()),
                                     );

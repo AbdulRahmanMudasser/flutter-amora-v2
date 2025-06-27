@@ -48,14 +48,12 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.creamWhite,
-              AppTheme.softPink.withValues(alpha: 0.3),
-            ],
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/backgrounds/bg-2.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.3,
           ),
         ),
         child: LayoutBuilder(
@@ -80,12 +78,15 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withValues(alpha: 0.3),
+                              color: AppTheme.roseGold.withOpacity(0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
                         ),
                         textAlign: TextAlign.center,
+                        textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Begin Your Love Story')
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
                       ),
                     ),
                     Container(
@@ -99,7 +100,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withValues(alpha: 0.3),
+                            color: AppTheme.softPink.withOpacity(0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -114,7 +115,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                           errorBuilder: (context, error, stackTrace) {
                             print('Error loading image: $error');
                             return Container(
-                              color: AppTheme.softPink.withValues(alpha: 0.2),
+                              color: AppTheme.softPink.withOpacity(0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -146,12 +147,15 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                         shadows: [
                           Shadow(
                             blurRadius: 3,
-                            color: AppTheme.roseGold.withValues(alpha: 0.3),
+                            color: AppTheme.roseGold.withOpacity(0.3),
                             offset: const Offset(1, 1),
                           ),
                         ],
                       ),
                       textAlign: TextAlign.center,
+                      textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Create Your Account')
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
                     ),
                     SizedBox(height: verticalSpacing * 2),
                     Form(
@@ -257,7 +261,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                 labelText: 'Role',
                                 prefixIcon: Icon(Icons.favorite_border, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                                fillColor: AppTheme.softPink.withOpacity(0.2),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
@@ -306,6 +310,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                               onPressed: authState.isLoading
                                   ? null
                                   : () async {
+                                debugPrint('Attempting registration with email: ${_emailController.text}');
                                 if (_formKey.currentState!.validate() && _selectedRole != null) {
                                   final userId = await ref.read(authStateProvider.notifier).register(
                                     username: _usernameController.text,
@@ -318,8 +323,9 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                   );
                                   if (userId != null) {
                                     final otp = await ref.read(authStateProvider.notifier).generateOtp(_emailController.text);
+                                    debugPrint('Registration successful, OTP: $otp, navigating to OtpVerificationScreen');
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('OTP: $otp (for testing)')),
+                                      SnackBar(content: Text('OTP: $otp')),
                                     );
                                     Navigator.push(
                                       context,
@@ -331,10 +337,13 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                       ),
                                     );
                                   } else {
+                                    debugPrint('Registration failed: ${authState.error}');
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(authState.error ?? 'Registration failed')),
                                     );
                                   }
+                                } else {
+                                  debugPrint('Form validation failed');
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -350,7 +359,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                   side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                                 ),
                                 elevation: 4,
-                                shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
+                                shadowColor: AppTheme.softPink.withOpacity(0.4),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -390,7 +399,11 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.pushReplacement(
+                                    debugPrint('Navigating to LoginScreen');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Navigating to Login')),
+                                    );
+                                    Navigator.push(
                                       context,
                                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                                     );

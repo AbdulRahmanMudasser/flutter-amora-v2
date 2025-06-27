@@ -25,6 +25,11 @@ dependencies:
   email_validator: ^3.0.0
   flutter_keyboard_visibility: ^6.0.0
   uuid: ^4.5.0
+  path: ^1.8.0
+  undo: ^1.0.0
+  image: ^4.0.0
+  share_plus: ^7.0.0
+  lottie: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -38,4 +43,6 @@ flutter:
   generate: true
   assets:
     - assets/images/
+    - assets/images/status/
+    - assets/images/backgrounds/
     - assets/fonts/

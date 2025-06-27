@@ -347,682 +347,684 @@ class WriteScreenState extends State<WriteScreen> {
           ),
         ),
         child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  constraints: BoxConstraints(
-                    maxHeight: screenHeight * 0.25,
-                    maxWidth: screenWidth * 0.85,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: AppTheme.roseGold, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.softPink.withOpacity(0.3),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
-                    child: Image.asset(
-                      'assets/images/write.jpg',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        print('Error loading image: $error');
-                        return Container(
-                          color: AppTheme.softPink.withOpacity(0.2),
-                          child: Icon(
-                            Icons.favorite,
-                            size: screenWidth * 0.15,
-                            color: AppTheme.roseGold,
-                          ),
-                        );
-                      },
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: screenHeight * 0.25,
+                      maxWidth: screenWidth * 0.85,
                     ),
-                  ),
-                ),
-                SizedBox(height: verticalSpacing * 2),
-                Directionality(
-                  textDirection: _getTextDirection('Write Your Heart'),
-                  child: Text(
-                    'Write Your Heart',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontSize: 26 * fontScaleFactor,
-                      color: AppTheme.deepRose,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 3,
-                          color: AppTheme.roseGold.withOpacity(0.3),
-                          offset: const Offset(1, 1),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.roseGold, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.softPink.withOpacity(0.3),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: verticalSpacing * 2),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      CustomTextField(
-                        label: 'Memory Name',
-                        controller: _nameController,
-                        prefixIcon: Icon(Icons.edit, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a memory name';
-                          }
-                          return null;
-                        },
-                      ),
-                      SizedBox(height: verticalSpacing),
-                      DropdownButton<String>(
-                        value: _editedBy,
-                        items: ['Wife', 'Husband']
-                            .map((role) => DropdownMenuItem(value: role, child: Text(role, style: GoogleFonts.montserrat())))
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _editedBy = value!;
-                          });
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Role set to $value', style: GoogleFonts.montserrat())),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Image.asset(
+                        'assets/images/write.jpg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('Error loading image: $error');
+                          return Container(
+                            color: AppTheme.softPink.withOpacity(0.2),
+                            child: Icon(
+                              Icons.favorite,
+                              size: screenWidth * 0.15,
+                              color: AppTheme.roseGold,
+                            ),
                           );
                         },
-                        style: GoogleFonts.montserrat(
-                          fontSize: 16 * fontScaleFactor,
-                          color: AppTheme.deepRose,
-                        ),
-                        dropdownColor: AppTheme.creamWhite,
                       ),
-                      SizedBox(height: verticalSpacing),
-                      if (!_isPreviewMode) ...[
-                        Image.asset(
-                          'assets/images/misc/floral-divider.png',
-                          width: screenWidth * 0.8,
+                    ),
+                  ),
+                  SizedBox(height: verticalSpacing * 2),
+                  Directionality(
+                    textDirection: _getTextDirection('Write Your Heart'),
+                    child: Text(
+                      'Write Your Heart',
+                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                        fontSize: 26 * fontScaleFactor,
+                        color: AppTheme.deepRose,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 3,
+                            color: AppTheme.roseGold.withOpacity(0.3),
+                            offset: const Offset(1, 1),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: verticalSpacing * 2),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        CustomTextField(
+                          label: 'Memory Name',
+                          controller: _nameController,
+                          prefixIcon: Icon(Icons.edit, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a memory name';
+                            }
+                            return null;
+                          },
                         ),
                         SizedBox(height: verticalSpacing),
-                        Directionality(
-                          textDirection: _getTextDirection('Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}'),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isFormattingExpanded = !_isFormattingExpanded;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    _isFormattingExpanded ? 'Formatting expanded' : 'Formatting collapsed',
-                                    style: GoogleFonts.montserrat(),
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Text(
-                              'Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16 * fontScaleFactor,
-                                color: AppTheme.roseGold,
-                              ),
-                            ),
+                        DropdownButton<String>(
+                          value: _editedBy,
+                          items: ['Wife', 'Husband']
+                              .map((role) => DropdownMenuItem(value: role, child: Text(role, style: GoogleFonts.montserrat())))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _editedBy = value!;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Role set to $value', style: GoogleFonts.montserrat())),
+                            );
+                          },
+                          style: GoogleFonts.montserrat(
+                            fontSize: 16 * fontScaleFactor,
+                            color: AppTheme.deepRose,
                           ),
+                          dropdownColor: AppTheme.creamWhite,
                         ),
                         SizedBox(height: verticalSpacing),
-                        if (_isFormattingExpanded) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(
-                                  Icons.format_bold,
-                                  color: _isBold ? AppTheme.roseGold : AppTheme.deepRose,
-                                  size: 20 * fontScaleFactor,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isBold = !_isBold;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Bold ${_isBold ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.format_italic,
-                                  color: _isItalic ? AppTheme.roseGold : AppTheme.deepRose,
-                                  size: 20 * fontScaleFactor,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _isItalic = !_isItalic;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Italic ${_isItalic ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  _hasShadow ? Icons.format_color_text : Icons.format_color_reset,
-                                  color: AppTheme.roseGold,
-                                  size: 20 * fontScaleFactor,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _hasShadow = !_hasShadow;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Shadow ${_hasShadow ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.format_align_left, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: () {
-                                  setState(() {
-                                    _textAlign = TextAlign.left;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Text aligned left', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.format_align_center, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: () {
-                                  setState(() {
-                                    _textAlign = TextAlign.center;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Text aligned center', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.format_align_right, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: () {
-                                  setState(() {
-                                    _textAlign = TextAlign.right;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Text aligned right', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Directionality(
-                                textDirection: _getTextDirection('Text Size: ${_textSize.round()}'),
-                                child: Text(
-                                  'Text Size: ${_textSize.round()}',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14 * fontScaleFactor,
-                                    color: AppTheme.deepRose,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Slider(
-                                value: _textSize,
-                                min: 12,
-                                max: 36,
-                                divisions: 24,
-                                label: _textSize.round().toString(),
-                                activeColor: AppTheme.roseGold,
-                                inactiveColor: AppTheme.softPink,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _textSize = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Directionality(
-                                textDirection: _getTextDirection('Rotation: ${_textRotation.round()}°'),
-                                child: Text(
-                                  'Rotation: ${_textRotation.round()}°',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 14 * fontScaleFactor,
-                                    color: AppTheme.deepRose,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Slider(
-                                value: _textRotation,
-                                min: 0,
-                                max: 360,
-                                divisions: 360,
-                                label: _textRotation.round().toString(),
-                                activeColor: AppTheme.roseGold,
-                                inactiveColor: AppTheme.softPink,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _textRotation = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Wrap(
-                            spacing: 10,
-                            children: [
-                              ChoiceChip(
-                                label: Text('Black', style: GoogleFonts.montserrat(color: Colors.white)),
-                                selected: _selectedColor == Colors.black,
-                                selectedColor: AppTheme.roseGold,
-                                backgroundColor: Colors.black,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() => _selectedColor = Colors.black);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Color set to Black', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                },
-                              ),
-                              ChoiceChip(
-                                label: Text('White', style: GoogleFonts.montserrat(color: Colors.black)),
-                                selected: _selectedColor == Colors.white,
-                                selectedColor: AppTheme.roseGold,
-                                backgroundColor: Colors.white,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() => _selectedColor = Colors.white);
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Color set to White', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                },
-                              ),
-                              ChoiceChip(
-                                label: Text('Blush Pink', style: GoogleFonts.montserrat(color: Colors.black)),
-                                selected: _selectedColor == const Color(0xFFFFB6C1),
-                                selectedColor: AppTheme.roseGold,
-                                backgroundColor: const Color(0xFFFFB6C1),
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() => _selectedColor = const Color(0xFFFFB6C1));
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Color set to Blush Pink', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                },
-                              ),
-                              ChoiceChip(
-                                label: Text('Burgundy', style: GoogleFonts.montserrat(color: Colors.white)),
-                                selected: _selectedColor == const Color(0xFF800020),
-                                selectedColor: AppTheme.roseGold,
-                                backgroundColor: const Color(0xFF800020),
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() => _selectedColor = const Color(0xFF800020));
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Color set to Burgundy', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          DropdownButton<String>(
-                            value: _selectedFilter,
-                            items: ['None', 'Sepia', 'Grayscale']
-                                .map((filter) => DropdownMenuItem(value: filter, child: Text(filter, style: GoogleFonts.montserrat())))
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedFilter = value!;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Filter set to $value', style: GoogleFonts.montserrat())),
-                              );
-                            },
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
-                              color: AppTheme.deepRose,
-                            ),
-                            dropdownColor: AppTheme.creamWhite,
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.undo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: _undoStack.canUndo
-                                    ? () {
-                                  setState(() {
-                                    _undoStack.undo();
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Undo', style: GoogleFonts.montserrat())),
-                                  );
-                                }
-                                    : null,
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.redo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: _undoStack.canRedo
-                                    ? () {
-                                  setState(() {
-                                    _undoStack.redo();
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Redo', style: GoogleFonts.montserrat())),
-                                  );
-                                }
-                                    : null,
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.preview, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                onPressed: () {
-                                  setState(() {
-                                    _isPreviewMode = !_isPreviewMode;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        _isPreviewMode ? 'Preview mode enabled' : 'Preview mode disabled',
-                                        style: GoogleFonts.montserrat(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: verticalSpacing),
+                        if (!_isPreviewMode) ...[
                           Image.asset(
                             'assets/images/misc/floral-divider.png',
                             width: screenWidth * 0.8,
                           ),
                           SizedBox(height: verticalSpacing),
-                        ],
-                      ],
-                      SizedBox(height: verticalSpacing),
-                      ElevatedButton(
-                        onPressed: _pickImageFromGallery,
-                        child: Text(
-                          'Pick from Gallery',
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16 * fontScaleFactor,
-                            color: AppTheme.creamWhite,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: verticalSpacing),
-                      SizedBox(
-                        height: screenHeight * 0.1,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _backgroundImages.length,
-                          itemBuilder: (context, index) {
-                            final image = _backgroundImages[index];
-                            return GestureDetector(
+                          Directionality(
+                            textDirection: _getTextDirection('Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}'),
+                            child: GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _selectedImage = image;
+                                  _isFormattingExpanded = !_isFormattingExpanded;
                                 });
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Background image selected', style: GoogleFonts.montserrat())),
+                                  SnackBar(
+                                    content: Text(
+                                      _isFormattingExpanded ? 'Formatting expanded' : 'Formatting collapsed',
+                                      style: GoogleFonts.montserrat(),
+                                    ),
+                                  ),
                                 );
                               },
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 5),
-                                width: screenWidth * 0.2,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: _selectedImage == image ? AppTheme.roseGold : Colors.transparent,
-                                    width: 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Image.asset(
-                                  image,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    print('Error loading image: $error');
-                                    return const Icon(Icons.error, color: AppTheme.roseGold);
-                                  },
+                              child: Text(
+                                'Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16 * fontScaleFactor,
+                                  color: AppTheme.roseGold,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                      SizedBox(height: verticalSpacing),
-                      if (_selectedImage != null)
-                        Container(
-                          constraints: BoxConstraints(
-                            maxHeight: screenHeight * 0.5,
-                            maxWidth: screenWidth * 0.95,
+                            ),
                           ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppTheme.roseGold, width: 1.5),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Stack(
-                              alignment: Alignment.center,
+                          SizedBox(height: verticalSpacing),
+                          if (_isFormattingExpanded) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                ColorFiltered(
-                                  colorFilter: _selectedFilter == 'Sepia'
-                                      ? const ColorFilter.matrix([
-                                    0.393, 0.769, 0.189, 0, 0,
-                                    0.349, 0.686, 0.168, 0, 0,
-                                    0.272, 0.534, 0.131, 0, 0,
-                                    0, 0, 0, 1, 0,
-                                  ])
-                                      : _selectedFilter == 'Grayscale'
-                                      ? const ColorFilter.matrix([
-                                    0.2126, 0.7152, 0.0722, 0, 0,
-                                    0.2126, 0.7152, 0.0722, 0, 0,
-                                    0.2126, 0.7152, 0.0722, 0, 0,
-                                    0, 0, 0, 1, 0,
-                                  ])
-                                      : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                                  child: _selectedImage!.startsWith('assets/')
-                                      ? Image.asset(
-                                    _selectedImage!,
-                                    fit: BoxFit.contain,
-                                    width: screenWidth * 0.95,
-                                    height: screenHeight * 0.5,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print('Error loading image: $error');
-                                      return const Icon(Icons.error, color: AppTheme.roseGold);
-                                    },
-                                  )
-                                      : Image.file(
-                                    File(_selectedImage!),
-                                    fit: BoxFit.contain,
-                                    width: screenWidth * 0.95,
-                                    height: screenHeight * 0.5,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print('Error loading image: $error');
-                                      return const Icon(Icons.error, color: AppTheme.roseGold);
-                                    },
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.format_bold,
+                                    color: _isBold ? AppTheme.roseGold : AppTheme.deepRose,
+                                    size: 20 * fontScaleFactor,
                                   ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isBold = !_isBold;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Bold ${_isBold ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
                                 ),
-                                Positioned(
-                                  left: _textPosition.dx + screenWidth * 0.475,
-                                  top: _textPosition.dy + screenHeight * 0.25,
-                                  child: _isPreviewMode
-                                      ? Transform.rotate(
-                                    angle: _textRotation * 3.14159 / 180,
-                                    child: Directionality(
-                                      textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
-                                      child: Text(
-                                        _textController.text.isEmpty ? 'Your Text' : _textController.text,
-                                        textAlign: _textAlign,
-                                        textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: _textSize,
-                                          color: _selectedColor,
-                                          fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-                                          fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-                                          shadows: _hasShadow
-                                              ? [
-                                            Shadow(
-                                              blurRadius: 4,
-                                              color: AppTheme.roseGold.withOpacity(0.5),
-                                              offset: const Offset(1, 1),
-                                            ),
-                                          ]
-                                              : null,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                                      : GestureDetector(
-                                    onPanUpdate: (details) {
-                                      setState(() {
-                                        final newX = _textPosition.dx + details.delta.dx;
-                                        final newY = _textPosition.dy + details.delta.dy;
-                                        final maxWidth = screenWidth * 0.95 / 2;
-                                        final maxHeight = screenHeight * 0.5 / 2;
-                                        _textPosition = Offset(
-                                          newX.clamp(-maxWidth, maxWidth),
-                                          newY.clamp(-maxHeight, maxHeight),
-                                        );
-                                      });
-                                    },
-                                    onDoubleTap: _resetTextPosition,
-                                    child: Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: screenWidth * 0.8,
-                                        minWidth: screenWidth * 0.3,
-                                        minHeight: screenHeight * 0.05,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(color: AppTheme.roseGold, width: 1.5),
-                                        borderRadius: BorderRadius.circular(12),
-                                        color: AppTheme.creamWhite.withOpacity(0.8),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: AppTheme.softPink.withOpacity(0.3),
-                                            blurRadius: 6,
-                                            spreadRadius: 1,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: screenWidth * 0.03,
-                                        vertical: screenHeight * 0.015,
-                                      ),
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          Transform.rotate(
-                                            angle: _textRotation * 3.14159 / 180,
-                                            child: TextField(
-                                              controller: _textController,
-                                              textAlign: _textAlign,
-                                              style: GoogleFonts.montserrat(
-                                                fontSize: _textSize,
-                                                color: _selectedColor,
-                                                fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-                                                fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-                                                shadows: _hasShadow
-                                                    ? [
-                                                  Shadow(
-                                                    blurRadius: 4,
-                                                    color: AppTheme.roseGold.withOpacity(0.5),
-                                                    offset: const Offset(1, 1),
-                                                  ),
-                                                ]
-                                                    : null,
-                                              ),
-                                              decoration: InputDecoration(
-                                                hintText: 'Your Text',
-                                                hintStyle: GoogleFonts.montserrat(
-                                                  color: AppTheme.roseGold.withOpacity(0.5),
-                                                  fontSize: _textSize,
-                                                ),
-                                                border: InputBorder.none,
-                                              ),
-                                              textDirection: _getTextDirection(_textController.text),
-                                              maxLines: null,
-                                              maxLength: 200,
-                                            ),
-                                          ),
-                                          Positioned(
-                                            bottom: 2,
-                                            right: 2,
-                                            child: Icon(
-                                              Icons.drag_indicator,
-                                              color: AppTheme.roseGold,
-                                              size: 24 * fontScaleFactor,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.format_italic,
+                                    color: _isItalic ? AppTheme.roseGold : AppTheme.deepRose,
+                                    size: 20 * fontScaleFactor,
                                   ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isItalic = !_isItalic;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Italic ${_isItalic ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    _hasShadow ? Icons.format_color_text : Icons.format_color_reset,
+                                    color: AppTheme.roseGold,
+                                    size: 20 * fontScaleFactor,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _hasShadow = !_hasShadow;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Shadow ${_hasShadow ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
                                 ),
                               ],
                             ),
+                            SizedBox(height: verticalSpacing),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.format_align_left, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: () {
+                                    setState(() {
+                                      _textAlign = TextAlign.left;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Text aligned left', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.format_align_center, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: () {
+                                    setState(() {
+                                      _textAlign = TextAlign.center;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Text aligned center', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.format_align_right, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: () {
+                                    setState(() {
+                                      _textAlign = TextAlign.right;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Text aligned right', style: GoogleFonts.montserrat())),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Directionality(
+                                  textDirection: _getTextDirection('Text Size: ${_textSize.round()}'),
+                                  child: Text(
+                                    'Text Size: ${_textSize.round()}',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14 * fontScaleFactor,
+                                      color: AppTheme.deepRose,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Slider(
+                                  value: _textSize,
+                                  min: 12,
+                                  max: 36,
+                                  divisions: 24,
+                                  label: _textSize.round().toString(),
+                                  activeColor: AppTheme.roseGold,
+                                  inactiveColor: AppTheme.softPink,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _textSize = value;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Directionality(
+                                  textDirection: _getTextDirection('Rotation: ${_textRotation.round()}°'),
+                                  child: Text(
+                                    'Rotation: ${_textRotation.round()}°',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14 * fontScaleFactor,
+                                      color: AppTheme.deepRose,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Slider(
+                                  value: _textRotation,
+                                  min: 0,
+                                  max: 360,
+                                  divisions: 360,
+                                  label: _textRotation.round().toString(),
+                                  activeColor: AppTheme.roseGold,
+                                  inactiveColor: AppTheme.softPink,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _textRotation = value;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            Wrap(
+                              spacing: 10,
+                              children: [
+                                ChoiceChip(
+                                  label: Text('Black', style: GoogleFonts.montserrat(color: Colors.white)),
+                                  selected: _selectedColor == Colors.black,
+                                  selectedColor: AppTheme.roseGold,
+                                  backgroundColor: Colors.black,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _selectedColor = Colors.black);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Color set to Black', style: GoogleFonts.montserrat())),
+                                      );
+                                    }
+                                  },
+                                ),
+                                ChoiceChip(
+                                  label: Text('White', style: GoogleFonts.montserrat(color: Colors.black)),
+                                  selected: _selectedColor == Colors.white,
+                                  selectedColor: AppTheme.roseGold,
+                                  backgroundColor: Colors.white,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _selectedColor = Colors.white);
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Color set to White', style: GoogleFonts.montserrat())),
+                                      );
+                                    }
+                                  },
+                                ),
+                                ChoiceChip(
+                                  label: Text('Blush Pink', style: GoogleFonts.montserrat(color: Colors.black)),
+                                  selected: _selectedColor == const Color(0xFFFFB6C1),
+                                  selectedColor: AppTheme.roseGold,
+                                  backgroundColor: const Color(0xFFFFB6C1),
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _selectedColor = const Color(0xFFFFB6C1));
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Color set to Blush Pink', style: GoogleFonts.montserrat())),
+                                      );
+                                    }
+                                  },
+                                ),
+                                ChoiceChip(
+                                  label: Text('Burgundy', style: GoogleFonts.montserrat(color: Colors.white)),
+                                  selected: _selectedColor == const Color(0xFF800020),
+                                  selectedColor: AppTheme.roseGold,
+                                  backgroundColor: const Color(0xFF800020),
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _selectedColor = const Color(0xFF800020));
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text('Color set to Burgundy', style: GoogleFonts.montserrat())),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            DropdownButton<String>(
+                              value: _selectedFilter,
+                              items: ['None', 'Sepia', 'Grayscale']
+                                  .map((filter) => DropdownMenuItem(value: filter, child: Text(filter, style: GoogleFonts.montserrat())))
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedFilter = value!;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Filter set to $value', style: GoogleFonts.montserrat())),
+                                );
+                              },
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16 * fontScaleFactor,
+                                color: AppTheme.deepRose,
+                              ),
+                              dropdownColor: AppTheme.creamWhite,
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.undo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: _undoStack.canUndo
+                                      ? () {
+                                    setState(() {
+                                      _undoStack.undo();
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Undo', style: GoogleFonts.montserrat())),
+                                    );
+                                  }
+                                      : null,
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.redo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: _undoStack.canRedo
+                                      ? () {
+                                    setState(() {
+                                      _undoStack.redo();
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Redo', style: GoogleFonts.montserrat())),
+                                    );
+                                  }
+                                      : null,
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.preview, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                                  onPressed: () {
+                                    setState(() {
+                                      _isPreviewMode = !_isPreviewMode;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          _isPreviewMode ? 'Preview mode enabled' : 'Preview mode disabled',
+                                          style: GoogleFonts.montserrat(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: verticalSpacing),
+                            Image.asset(
+                              'assets/images/misc/floral-divider.png',
+                              width: screenWidth * 0.8,
+                            ),
+                            SizedBox(height: verticalSpacing),
+                          ],
+                        ],
+                        SizedBox(height: verticalSpacing),
+                        ElevatedButton(
+                          onPressed: _pickImageFromGallery,
+                          child: Text(
+                            'Pick from Gallery',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16 * fontScaleFactor,
+                              color: AppTheme.creamWhite,
+                            ),
                           ),
                         ),
-                      SizedBox(height: verticalSpacing),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: _saveMemory,
-                            child: Text(
-                              'Save',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16 * fontScaleFactor,
-                                color: AppTheme.creamWhite,
+                        SizedBox(height: verticalSpacing),
+                        SizedBox(
+                          height: screenHeight * 0.1,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: _backgroundImages.length,
+                            itemBuilder: (context, index) {
+                              final image = _backgroundImages[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedImage = image;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Background image selected', style: GoogleFonts.montserrat())),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 5),
+                                  width: screenWidth * 0.2,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: _selectedImage == image ? AppTheme.roseGold : Colors.transparent,
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Image.asset(
+                                    image,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      print('Error loading image: $error');
+                                      return const Icon(Icons.error, color: AppTheme.roseGold);
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        SizedBox(height: verticalSpacing),
+                        if (_selectedImage != null)
+                          Container(
+                            constraints: BoxConstraints(
+                              maxHeight: screenHeight * 0.5,
+                              maxWidth: screenWidth * 0.95,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppTheme.roseGold, width: 1.5),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  ColorFiltered(
+                                    colorFilter: _selectedFilter == 'Sepia'
+                                        ? const ColorFilter.matrix([
+                                      0.393, 0.769, 0.189, 0, 0,
+                                      0.349, 0.686, 0.168, 0, 0,
+                                      0.272, 0.534, 0.131, 0, 0,
+                                      0, 0, 0, 1, 0,
+                                    ])
+                                        : _selectedFilter == 'Grayscale'
+                                        ? const ColorFilter.matrix([
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0.2126, 0.7152, 0.0722, 0, 0,
+                                      0, 0, 0, 1, 0,
+                                    ])
+                                        : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+                                    child: _selectedImage!.startsWith('assets/')
+                                        ? Image.asset(
+                                      _selectedImage!,
+                                      fit: BoxFit.contain,
+                                      width: screenWidth * 0.95,
+                                      height: screenHeight * 0.5,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        print('Error loading image: $error');
+                                        return const Icon(Icons.error, color: AppTheme.roseGold);
+                                      },
+                                    )
+                                        : Image.file(
+                                      File(_selectedImage!),
+                                      fit: BoxFit.contain,
+                                      width: screenWidth * 0.95,
+                                      height: screenHeight * 0.5,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        print('Error loading image: $error');
+                                        return const Icon(Icons.error, color: AppTheme.roseGold);
+                                      },
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: _textPosition.dx + screenWidth * 0.475,
+                                    top: _textPosition.dy + screenHeight * 0.25,
+                                    child: _isPreviewMode
+                                        ? Transform.rotate(
+                                      angle: _textRotation * 3.14159 / 180,
+                                      child: Directionality(
+                                        textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
+                                        child: Text(
+                                          _textController.text.isEmpty ? 'Your Text' : _textController.text,
+                                          textAlign: _textAlign,
+                                          textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: _textSize,
+                                            color: _selectedColor,
+                                            fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
+                                            fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
+                                            shadows: _hasShadow
+                                                ? [
+                                              Shadow(
+                                                blurRadius: 4,
+                                                color: AppTheme.roseGold.withOpacity(0.5),
+                                                offset: const Offset(1, 1),
+                                              ),
+                                            ]
+                                                : null,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                        : GestureDetector(
+                                      onPanUpdate: (details) {
+                                        setState(() {
+                                          final newX = _textPosition.dx + details.delta.dx;
+                                          final newY = _textPosition.dy + details.delta.dy;
+                                          final maxWidth = screenWidth * 0.95 / 2;
+                                          final maxHeight = screenHeight * 0.5 / 2;
+                                          _textPosition = Offset(
+                                            newX.clamp(-maxWidth, maxWidth),
+                                            newY.clamp(-maxHeight, maxHeight),
+                                          );
+                                        });
+                                      },
+                                      onDoubleTap: _resetTextPosition,
+                                      child: Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: screenWidth * 0.8,
+                                          minWidth: screenWidth * 0.3,
+                                          minHeight: screenHeight * 0.05,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: AppTheme.roseGold, width: 1.5),
+                                          borderRadius: BorderRadius.circular(12),
+                                          color: AppTheme.creamWhite.withOpacity(0.8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppTheme.softPink.withOpacity(0.3),
+                                              blurRadius: 6,
+                                              spreadRadius: 1,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: screenWidth * 0.03,
+                                          vertical: screenHeight * 0.015,
+                                        ),
+                                        child: Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            Transform.rotate(
+                                              angle: _textRotation * 3.14159 / 180,
+                                              child: TextField(
+                                                controller: _textController,
+                                                textAlign: _textAlign,
+                                                style: GoogleFonts.montserrat(
+                                                  fontSize: _textSize,
+                                                  color: _selectedColor,
+                                                  fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
+                                                  fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
+                                                  shadows: _hasShadow
+                                                      ? [
+                                                    Shadow(
+                                                      blurRadius: 4,
+                                                      color: AppTheme.roseGold.withOpacity(0.5),
+                                                      offset: const Offset(1, 1),
+                                                    ),
+                                                  ]
+                                                      : null,
+                                                ),
+                                                decoration: InputDecoration(
+                                                  hintText: 'Your Text',
+                                                  hintStyle: GoogleFonts.montserrat(
+                                                    color: AppTheme.roseGold.withOpacity(0.5),
+                                                    fontSize: _textSize,
+                                                  ),
+                                                  border: InputBorder.none,
+                                                ),
+                                                textDirection: _getTextDirection(_textController.text),
+                                                maxLines: null,
+                                                maxLength: 200,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 2,
+                                              right: 2,
+                                              child: Icon(
+                                                Icons.drag_indicator,
+                                                color: AppTheme.roseGold,
+                                                size: 24 * fontScaleFactor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          ElevatedButton(
-                            onPressed: _shareMemory,
-                            child: Text(
-                              'Share',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16 * fontScaleFactor,
-                                color: AppTheme.creamWhite,
+                        SizedBox(height: verticalSpacing),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ElevatedButton(
+                              onPressed: _saveMemory,
+                              child: Text(
+                                'Save',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16 * fontScaleFactor,
+                                  color: AppTheme.creamWhite,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            const SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: _shareMemory,
+                              child: Text(
+                                'Share',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 16 * fontScaleFactor,
+                                  color: AppTheme.creamWhite,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

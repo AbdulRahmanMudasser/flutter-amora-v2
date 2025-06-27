@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -26,6 +26,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     required String securityQuestion,
     required String securityAnswer,
     required String secretWord,
+    String? cnic,
+    String? passport,
+    List<String>? phoneNumbers,
+    String? nikkahNama,
+    String? husbandBirthday,
+    String? wifeBirthday,
   }) async {
     state = const AuthState(isLoading: true);
     try {
@@ -43,6 +49,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         securityQuestion: securityQuestion,
         securityAnswer: securityAnswer,
         secretWord: secretWord,
+        cnic: cnic,
+        passport: passport,
+        phoneNumbers: phoneNumbers,
+        nikkahNama: nikkahNama,
+        husbandBirthday: husbandBirthday,
+        wifeBirthday: wifeBirthday,
       );
 
       await _userBox.put(userId, user);
@@ -132,6 +144,53 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     } catch (e) {
       debugPrint('Error recovering password: $e');
       return null;
+    }
+  }
+
+  Future<bool> updateUser({
+    required String email,
+    String? username,
+    String? password,
+    String? cnic,
+    String? passport,
+    List<String>? phoneNumbers,
+    String? nikkahNama,
+    String? husbandBirthday,
+    String? wifeBirthday,
+  }) async {
+    state = const AuthState(isLoading: true);
+    try {
+      final user = _userBox.values.firstWhere(
+            (user) => user.email == email,
+        orElse: () => throw Exception('User not found'),
+      );
+
+      final updatedUser = UserModel(
+        id: user.id,
+        username: username ?? user.username,
+        email: user.email,
+        role: user.role,
+        securityQuestion: user.securityQuestion,
+        securityAnswer: user.securityAnswer,
+        secretWord: user.secretWord,
+        cnic: cnic ?? user.cnic,
+        passport: passport ?? user.passport,
+        phoneNumbers: phoneNumbers ?? user.phoneNumbers,
+        nikkahNama: nikkahNama ?? user.nikkahNama,
+        husbandBirthday: husbandBirthday ?? user.husbandBirthday,
+        wifeBirthday: wifeBirthday ?? user.wifeBirthday,
+      );
+
+      await _userBox.put(user.id, updatedUser);
+      if (password != null) {
+        await _secureStorage.write(key: 'password_${user.id}', value: password);
+      }
+
+      state = const AuthState();
+      return true;
+    } catch (e) {
+      state = AuthState(error: e.toString());
+      return false;
     }
   }
 }

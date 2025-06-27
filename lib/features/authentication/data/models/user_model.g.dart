@@ -24,13 +24,19 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       securityQuestion: fields[4] as String,
       securityAnswer: fields[5] as String,
       secretWord: fields[6] as String,
+      cnic: fields[7] as String?,
+      passport: fields[8] as String?,
+      phoneNumbers: (fields[9] as List?)?.cast<String>(),
+      nikkahNama: fields[10] as String?,
+      husbandBirthday: fields[11] as String?,
+      wifeBirthday: fields[12] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -44,7 +50,19 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(5)
       ..write(obj.securityAnswer)
       ..writeByte(6)
-      ..write(obj.secretWord);
+      ..write(obj.secretWord)
+      ..writeByte(7)
+      ..write(obj.cnic)
+      ..writeByte(8)
+      ..write(obj.passport)
+      ..writeByte(9)
+      ..write(obj.phoneNumbers)
+      ..writeByte(10)
+      ..write(obj.nikkahNama)
+      ..writeByte(11)
+      ..write(obj.husbandBirthday)
+      ..writeByte(12)
+      ..write(obj.wifeBirthday);
   }
 
   @override

@@ -43,14 +43,12 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.creamWhite,
-              AppTheme.softPink.withValues(alpha: 0.3),
-            ],
+        constraints: const BoxConstraints.expand(),
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/backgrounds/bg-3.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.3,
           ),
         ),
         child: LayoutBuilder(
@@ -75,12 +73,15 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withValues(alpha: 0.3),
+                              color: AppTheme.roseGold.withOpacity(0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
                         ),
                         textAlign: TextAlign.center,
+                        textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Verify Your Love')
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
                       ),
                     ),
                     Container(
@@ -94,7 +95,7 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withValues(alpha: 0.3),
+                            color: AppTheme.softPink.withOpacity(0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -109,7 +110,7 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                           errorBuilder: (context, error, stackTrace) {
                             debugPrint('Error loading image: $error');
                             return Container(
-                              color: AppTheme.softPink.withValues(alpha: 0.2),
+                              color: AppTheme.softPink.withOpacity(0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -141,12 +142,15 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                         shadows: [
                           Shadow(
                             blurRadius: 3,
-                            color: AppTheme.roseGold.withValues(alpha: 0.3),
+                            color: AppTheme.roseGold.withOpacity(0.3),
                             offset: const Offset(1, 1),
                           ),
                         ],
                       ),
                       textAlign: TextAlign.center,
+                      textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Enter the OTP')
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
                     ),
                     SizedBox(height: verticalSpacing * 2),
                     Form(
@@ -172,7 +176,7 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                                   size: 20 * fontScaleFactor,
                                 ),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                                fillColor: AppTheme.softPink.withOpacity(0.2),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
@@ -213,12 +217,14 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                               onPressed: authState.isLoading
                                   ? null
                                   : () async {
+                                debugPrint('Verifying OTP: ${_otpController.text} for email: ${widget.email}');
                                 if (_formKey.currentState!.validate()) {
                                   final isValid = await ref.read(authStateProvider.notifier).verifyOtp(
                                     widget.email,
                                     _otpController.text,
                                   );
                                   if (isValid) {
+                                    debugPrint('OTP verified, navigating to LoginScreen');
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('OTP verified successfully!')),
                                     );
@@ -227,10 +233,13 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                                       MaterialPageRoute(builder: (context) => const LoginScreen()),
                                     );
                                   } else {
+                                    debugPrint('OTP verification failed');
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(content: Text('Invalid OTP')),
                                     );
                                   }
+                                } else {
+                                  debugPrint('OTP form validation failed');
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -246,7 +255,7 @@ class OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
                                   side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                                 ),
                                 elevation: 4,
-                                shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
+                                shadowColor: AppTheme.softPink.withOpacity(0.4),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

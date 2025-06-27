@@ -45,4 +45,6 @@ flutter:
     - assets/images/
     - assets/images/status/
     - assets/images/backgrounds/
+    - assets/images/misc/
+    - assets/lottie/
     - assets/fonts/

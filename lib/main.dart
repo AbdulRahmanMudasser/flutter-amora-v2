@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:amora/features/dashboard/data/models/task_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,7 +21,9 @@ void main() async {
   final directory = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(directory.path);
   Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(TaskModelAdapter());
   await Hive.openBox<UserModel>('users');
+  await Hive.openBox<TaskModel>('tasks');
 
   // Create memories directory for image storage
   final memoriesDir = Directory('${directory.path}/memories');

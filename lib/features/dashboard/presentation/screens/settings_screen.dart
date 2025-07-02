@@ -79,7 +79,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppTheme.creamWhite, AppTheme.softPink.withOpacity(0.3)],
+            colors: [AppTheme.creamWhite, AppTheme.softPink.withValues(alpha: 0.3)],
           ),
         ),
         child: FutureBuilder(
@@ -105,7 +105,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                           border: Border.all(color: AppTheme.roseGold, width: 2),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.softPink.withOpacity(0.3),
+                              color: AppTheme.softPink.withValues(alpha: 0.3),
                               blurRadius: 8,
                               spreadRadius: 2,
                               offset: const Offset(0, 2),
@@ -118,9 +118,9 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                             'assets/images/write.jpg',
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
-                              print('Error loading image: $error');
+                              debugPrint('Error loading image: $error');
                               return Container(
-                                color: AppTheme.softPink.withOpacity(0.2),
+                                color: AppTheme.softPink.withValues(alpha: 0.2),
                                 child: Icon(Icons.favorite, size: screenWidth * 0.15, color: AppTheme.roseGold),
                               );
                             },
@@ -136,7 +136,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withOpacity(0.3),
+                              color: AppTheme.roseGold.withValues(alpha: 0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],

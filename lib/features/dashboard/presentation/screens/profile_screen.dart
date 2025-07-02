@@ -31,8 +31,8 @@ class ProfileScreen extends StatelessWidget {
             end: Alignment.bottomRight,
             colors: [
               AppTheme.creamWhite,
-              AppTheme.softPink.withOpacity(0.4),
-              AppTheme.roseGold.withOpacity(0.2),
+              AppTheme.softPink.withValues(alpha: 0.4),
+              AppTheme.roseGold.withValues(alpha: 0.2),
             ],
             stops: const [0.0, 0.7, 1.0],
           ),
@@ -98,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withOpacity(0.3),
+                            color: AppTheme.softPink.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -111,9 +111,9 @@ class ProfileScreen extends StatelessWidget {
                           'assets/images/login.jpg',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            print('Error loading header: $error');
+                            debugPrint('Error loading header: $error');
                             return Container(
-                              color: AppTheme.softPink.withOpacity(0.2),
+                              color: AppTheme.softPink.withValues(alpha: 0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -136,7 +136,7 @@ class ProfileScreen extends StatelessWidget {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withOpacity(0.3),
+                              color: AppTheme.roseGold.withValues(alpha: 0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
@@ -254,7 +254,7 @@ class ProfileScreen extends StatelessWidget {
                             side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                           ),
                           elevation: 4,
-                          shadowColor: AppTheme.softPink.withOpacity(0.4),
+                          shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

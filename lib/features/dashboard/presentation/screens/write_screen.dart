@@ -224,8 +224,8 @@ class _WriteScreenState extends State<WriteScreen> {
               end: Alignment.bottomRight,
               colors: [
                 AppTheme.creamWhite,
-                AppTheme.softPink.withOpacity(0.4),
-                AppTheme.roseGold.withOpacity(0.2),
+                AppTheme.softPink.withValues(alpha: 0.4),
+                AppTheme.roseGold.withValues(alpha: 0.2),
               ],
               stops: const [0.0, 0.7, 1.0],
             ),
@@ -268,7 +268,7 @@ class _WriteScreenState extends State<WriteScreen> {
             shadows: [
               Shadow(
                 blurRadius: 4,
-                color: AppTheme.roseGold.withOpacity(0.3),
+                color: AppTheme.roseGold.withValues(alpha: 0.3),
                 offset: const Offset(2, 2),
               ),
             ],
@@ -404,7 +404,7 @@ class _WriteScreenState extends State<WriteScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppTheme.roseGold, width: 1.5),
-        color: AppTheme.creamWhite.withOpacity(0.85),
+        color: AppTheme.creamWhite.withValues(alpha: 0.85),
       ),
       child: TextField(
         onChanged: onChanged,
@@ -417,7 +417,7 @@ class _WriteScreenState extends State<WriteScreen> {
           labelText: label,
           labelStyle: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
           ),
           border: InputBorder.none,
         ),
@@ -433,7 +433,7 @@ class _WriteScreenState extends State<WriteScreen> {
           'Language',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -467,7 +467,7 @@ class _WriteScreenState extends State<WriteScreen> {
           'Text Alignment',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -487,18 +487,18 @@ class _WriteScreenState extends State<WriteScreen> {
                   : TextAlign.right;
             });
           },
+          borderRadius: BorderRadius.circular(8),
+          selectedColor: AppTheme.roseGold,
+          fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+          constraints: BoxConstraints(
+            minHeight: isMobile ? 36 : 48,
+            minWidth: isMobile ? 36 : 48,
+          ),
           children: [
             Icon(Icons.format_align_left, size: isMobile ? 20 : 24),
             Icon(Icons.format_align_center, size: isMobile ? 20 : 24),
             Icon(Icons.format_align_right, size: isMobile ? 20 : 24),
           ],
-          borderRadius: BorderRadius.circular(8),
-          selectedColor: AppTheme.roseGold,
-          fillColor: AppTheme.softPink.withOpacity(0.2),
-          constraints: BoxConstraints(
-            minHeight: isMobile ? 36 : 48,
-            minWidth: isMobile ? 36 : 48,
-          ),
         ),
       ],
     );
@@ -512,7 +512,7 @@ class _WriteScreenState extends State<WriteScreen> {
           'Font Size: ${_fontSize.round()}',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -536,7 +536,7 @@ class _WriteScreenState extends State<WriteScreen> {
           'Word Styling:',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -622,7 +622,7 @@ class _WriteScreenState extends State<WriteScreen> {
           'Preloaded Images:',
           style: GoogleFonts.montserrat(
             fontSize: isMobile ? 14 : 16,
-            color: AppTheme.deepRose.withOpacity(0.8),
+            color: AppTheme.deepRose.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -663,7 +663,7 @@ class _WriteScreenState extends State<WriteScreen> {
                           return Container(
                             width: isMobile ? 70 : 90,
                             height: isMobile ? 90 : 110,
-                            color: AppTheme.softPink.withOpacity(0.2),
+                            color: AppTheme.softPink.withValues(alpha: 0.2),
                             child: Icon(
                               Icons.image,
                               size: isMobile ? 24 : 28,
@@ -696,7 +696,7 @@ class _WriteScreenState extends State<WriteScreen> {
         border: Border.all(color: AppTheme.roseGold, width: 2),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.softPink.withOpacity(0.3),
+            color: AppTheme.softPink.withValues(alpha: 0.3),
             blurRadius: 8,
             spreadRadius: 2,
             offset: const Offset(0, 2),
@@ -728,7 +728,7 @@ class _WriteScreenState extends State<WriteScreen> {
                     )
                   else
                     Container(
-                      color: AppTheme.softPink.withOpacity(0.2),
+                      color: AppTheme.softPink.withValues(alpha: 0.2),
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -884,7 +884,7 @@ class TextOverlayEditor extends StatelessWidget {
                 width: 200,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   border: Border.all(color: AppTheme.roseGold),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -919,7 +919,7 @@ class TextOverlayEditor extends StatelessWidget {
           Positioned(
             left: textPosition.dx,
             top: textPosition.dy,
-            child: Container(
+            child: SizedBox(
               width: 200,
               child: GestureDetector(
                 behavior: isPreviewMode ? HitTestBehavior.opaque : HitTestBehavior.translucent,
@@ -948,7 +948,7 @@ class TextOverlayEditor extends StatelessWidget {
                           shadows: [
                             Shadow(
                               blurRadius: 2,
-                              color: Colors.black.withOpacity(0.3),
+                              color: Colors.black.withValues(alpha: 0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],

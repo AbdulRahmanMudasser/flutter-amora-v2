@@ -76,8 +76,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             end: Alignment.bottomRight,
             colors: [
               AppTheme.creamWhite,
-              AppTheme.softPink.withOpacity(0.5),
-              AppTheme.roseGold.withOpacity(0.3),
+              AppTheme.softPink.withValues(alpha: 0.5),
+              AppTheme.roseGold.withValues(alpha: 0.3),
             ],
             stops: const [0.0, 0.6, 1.0],
           ),
@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     border: Border.all(color: AppTheme.roseGold, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.softPink.withOpacity(0.4),
+                        color: AppTheme.softPink.withValues(alpha: 0.4),
                         blurRadius: 12,
                         spreadRadius: 4,
                         offset: const Offset(0, 4),
@@ -110,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: AppTheme.softPink.withOpacity(0.2),
+                          color: AppTheme.softPink.withValues(alpha: 0.2),
                           child: Center(
                             child: Icon(
                               Icons.image,
@@ -146,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           shadows: [
                             Shadow(
                               blurRadius: 6,
-                              color: AppTheme.roseGold.withOpacity(0.4),
+                              color: AppTheme.roseGold.withValues(alpha: 0.4),
                               offset: const Offset(2, 2),
                             ),
                           ],
@@ -207,7 +207,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           child: Icon(
                             Icons.favorite,
                             size: isMobile ? 30 : 40,
-                            color: AppTheme.softPink.withOpacity(0.3),
+                            color: AppTheme.softPink.withValues(alpha: 0.3),
                           ),
                         ),
                       ),
@@ -219,7 +219,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           child: Icon(
                             Icons.favorite,
                             size: isMobile ? 25 : 35,
-                            color: AppTheme.softPink.withOpacity(0.3),
+                            color: AppTheme.softPink.withValues(alpha: 0.3),
                           ),
                         ),
                       ),

@@ -71,7 +71,7 @@ class MainScreenState extends State<MainScreen> {
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: AppTheme.roseGold,
-        unselectedItemColor: AppTheme.deepRose.withOpacity(0.6),
+        unselectedItemColor: AppTheme.deepRose.withValues(alpha: 0.6),
         backgroundColor: AppTheme.creamWhite,
         selectedLabelStyle: TextStyle(
           fontFamily: 'Montserrat',

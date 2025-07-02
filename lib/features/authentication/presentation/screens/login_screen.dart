@@ -190,7 +190,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           shadows: [
                             Shadow(
                               blurRadius: 3,
-                              color: AppTheme.roseGold.withOpacity(0.3),
+                              color: AppTheme.roseGold.withValues(alpha: 0.3),
                               offset: const Offset(1, 1),
                             ),
                           ],
@@ -212,7 +212,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         border: Border.all(color: AppTheme.roseGold, width: 2),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.softPink.withOpacity(0.3),
+                            color: AppTheme.softPink.withValues(alpha: 0.3),
                             blurRadius: 8,
                             spreadRadius: 2,
                             offset: const Offset(0, 2),
@@ -227,7 +227,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                           errorBuilder: (context, error, stackTrace) {
                             debugPrint('Error loading image: $error');
                             return Container(
-                              color: AppTheme.softPink.withOpacity(0.2),
+                              color: AppTheme.softPink.withValues(alpha: 0.2),
                               child: Icon(
                                 Icons.favorite,
                                 size: screenWidth * 0.15,
@@ -259,7 +259,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                         shadows: [
                           Shadow(
                             blurRadius: 3,
-                            color: AppTheme.roseGold.withOpacity(0.3),
+                            color: AppTheme.roseGold.withValues(alpha: 0.3),
                             offset: const Offset(1, 1),
                           ),
                         ],
@@ -328,7 +328,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                 labelText: 'Role',
                                 prefixIcon: Icon(Icons.favorite_border, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withOpacity(0.2),
+                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
                                   borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
@@ -436,7 +436,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                                   side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
                                 ),
                                 elevation: 4,
-                                shadowColor: AppTheme.softPink.withOpacity(0.4),
+                                shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
                               ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

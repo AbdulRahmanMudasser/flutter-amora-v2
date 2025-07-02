@@ -70,7 +70,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     Padding(
                       padding: EdgeInsets.only(top: verticalSpacing * 2, bottom: verticalSpacing),
                       child: Text(
-                        'Begin Your Love Story',
+                        'ASAD KI DUNIYA',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontSize: 22 * fontScaleFactor,
                           fontWeight: FontWeight.w700,
@@ -84,7 +84,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                           ],
                         ),
                         textAlign: TextAlign.center,
-                        textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('Begin Your Love Story')
+                        textDirection: RegExp(r'[\u0600-\u06FF]').hasMatch('ASAD KI DUNIYA')
                             ? TextDirection.rtl
                             : TextDirection.ltr,
                       ),
@@ -229,7 +229,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                             child: CustomTextField(
                               label: 'Security Answer',
                               controller: _securityAnswerController,
-                              prefixIcon: Icon(Icons.question_answer, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
+                              prefixIcon: Icon(Icons.text_fields, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please enter a security answer';

@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  CalendarFormat _calendarFormat = CalendarFormat.week;
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _detailsController = TextEditingController();
@@ -49,25 +49,29 @@ class HomeScreenState extends State<HomeScreen> {
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
-    final isLargeScreen = screenWidth > 600;
-    final fontScaleFactor = isLargeScreen ? 1.3 : 1.0;
-    final dialogWidth = isLargeScreen ? screenWidth * 0.5 : screenWidth * 0.9;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final dialogWidth = screenWidth * 0.85; // Optimized for mobile
+    final verticalPadding = 12.0;
+    final verticalSpacing = 10.0;
 
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: max((screenWidth - dialogWidth) / 2, 16),
-            vertical: 16,
-          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: (screenWidth - dialogWidth) / 2, vertical: 12),
           backgroundColor: AppTheme.creamWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: dialogWidth),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Container(
+            constraints: BoxConstraints(maxWidth: dialogWidth, maxHeight: screenHeight * 0.75),
             child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
               child: Padding(
-                padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
+                padding: EdgeInsets.only(
+                  left: verticalPadding,
+                  right: verticalPadding,
+                  top: verticalPadding,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + verticalPadding,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -76,13 +80,13 @@ class HomeScreenState extends State<HomeScreen> {
                       child: Text(
                         task == null ? 'Add Task' : 'Edit Task',
                         style: GoogleFonts.montserrat(
-                          fontSize: isLargeScreen ? 24 : 20,
+                          fontSize: 18,
                           color: AppTheme.deepRose,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    SizedBox(height: isLargeScreen ? 24 : 16),
+                    SizedBox(height: verticalSpacing),
                     Form(
                       key: _formKey,
                       child: Column(
@@ -92,26 +96,24 @@ class HomeScreenState extends State<HomeScreen> {
                             controller: _titleController,
                             decoration: InputDecoration(
                               labelText: 'Task Title',
-                              prefixIcon: const Icon(Icons.task, color: AppTheme.roseGold),
+                              prefixIcon: Icon(Icons.task, color: AppTheme.roseGold, size: 18),
                               filled: true,
-                              fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                              fillColor: AppTheme.softPink.withOpacity(0.2),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.deepRose, width: 2),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.deepRose, width: 1.8),
                               ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             ),
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
-                              color: AppTheme.deepRose,
-                            ),
+                            style: GoogleFonts.montserrat(fontSize: 14, color: AppTheme.deepRose),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Please enter a task title';
@@ -119,34 +121,32 @@ class HomeScreenState extends State<HomeScreen> {
                               return null;
                             },
                           ),
-                          SizedBox(height: isLargeScreen ? 20 : 16),
+                          SizedBox(height: verticalSpacing),
                           TextFormField(
                             controller: _detailsController,
                             decoration: InputDecoration(
                               labelText: 'Details',
-                              prefixIcon: const Icon(Icons.description, color: AppTheme.roseGold),
+                              prefixIcon: Icon(Icons.description, color: AppTheme.roseGold, size: 18),
                               filled: true,
-                              fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                              fillColor: AppTheme.softPink.withOpacity(0.2),
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                               ),
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppTheme.deepRose, width: 2),
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: const BorderSide(color: AppTheme.deepRose, width: 1.8),
                               ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                             ),
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
-                              color: AppTheme.deepRose,
-                            ),
-                            maxLines: isLargeScreen ? 4 : 3,
+                            style: GoogleFonts.montserrat(fontSize: 14, color: AppTheme.deepRose),
+                            maxLines: 2,
                           ),
-                          SizedBox(height: isLargeScreen ? 20 : 16),
+                          SizedBox(height: verticalSpacing),
                           InkWell(
                             onTap: () async {
                               final pickedDate = await showDatePicker(
@@ -169,44 +169,46 @@ class HomeScreenState extends State<HomeScreen> {
                               );
                               if (pickedDate != null) {
                                 setState(() {
-                                  _selectedEndDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+                                  _selectedEndDate = DateTime(
+                                    pickedDate.year,
+                                    pickedDate.month,
+                                    pickedDate.day,
+                                  );
                                 });
                               }
                             },
                             child: InputDecorator(
                               decoration: InputDecoration(
                                 labelText: 'End Date',
-                                prefixIcon: const Icon(Icons.calendar_today, color: AppTheme.roseGold),
+                                prefixIcon: Icon(Icons.calendar_today, color: AppTheme.roseGold, size: 18),
                                 filled: true,
-                                fillColor: AppTheme.softPink.withValues(alpha: 0.2),
+                                fillColor: AppTheme.softPink.withOpacity(0.2),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                                 ),
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.2),
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(color: AppTheme.deepRose, width: 2),
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderSide: const BorderSide(color: AppTheme.deepRose, width: 1.8),
                                 ),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                               ),
                               child: Text(
                                 _selectedEndDate != null
-                                    ? DateFormat('MMMM d, y').format(_selectedEndDate!)
+                                    ? DateFormat('MMM d, y').format(_selectedEndDate!)
                                     : 'Select a date',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16 * fontScaleFactor,
-                                  color: AppTheme.deepRose,
-                                ),
+                                style: GoogleFonts.montserrat(fontSize: 14, color: AppTheme.deepRose),
                               ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: isLargeScreen ? 24 : 16),
+                    SizedBox(height: verticalSpacing),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -214,13 +216,10 @@ class HomeScreenState extends State<HomeScreen> {
                           onPressed: () => Navigator.pop(context),
                           child: Text(
                             'Cancel',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
-                              color: AppTheme.roseGold,
-                            ),
+                            style: GoogleFonts.montserrat(fontSize: 14, color: AppTheme.roseGold),
                           ),
                         ),
-                        SizedBox(width: isLargeScreen ? 16 : 8),
+                        const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () async {
                             if (_formKey.currentState!.validate() && _selectedEndDate != null) {
@@ -242,20 +241,14 @@ class HomeScreenState extends State<HomeScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppTheme.roseGold,
                             foregroundColor: AppTheme.creamWhite,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 4,
-                            shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isLargeScreen ? 24 : 16,
-                              vertical: isLargeScreen ? 16 : 12,
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            elevation: 3,
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           ),
                           child: Text(
                             task == null ? 'Add' : 'Update',
                             style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.creamWhite,
                             ),
@@ -273,21 +266,17 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future _deleteTask(String taskId) async {
+  Future<bool?> _deleteTask(String taskId) async {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) {
         final screenWidth = MediaQuery.of(context).size.width;
-        final isLargeScreen = screenWidth > 600;
         return Dialog(
           backgroundColor: AppTheme.creamWhite,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: isLargeScreen ? screenWidth * 0.3 : 16,
-            vertical: 16,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Padding(
-            padding: EdgeInsets.all(isLargeScreen ? 24.0 : 16.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -296,25 +285,22 @@ class HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'Delete Task',
                     style: GoogleFonts.montserrat(
-                      fontSize: isLargeScreen ? 22 : 18,
+                      fontSize: 16,
                       color: AppTheme.deepRose,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-                SizedBox(height: isLargeScreen ? 24 : 16),
+                const SizedBox(height: 10),
                 Directionality(
                   textDirection: _getTextDirection('Are you sure you want to delete this task?'),
                   child: Text(
                     'Are you sure you want to delete this task?',
-                    style: GoogleFonts.montserrat(
-                      fontSize: isLargeScreen ? 16 : 14,
-                      color: AppTheme.deepRose,
-                    ),
+                    style: GoogleFonts.montserrat(fontSize: 12, color: AppTheme.deepRose),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                SizedBox(height: isLargeScreen ? 24 : 16),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -322,32 +308,21 @@ class HomeScreenState extends State<HomeScreen> {
                       onPressed: () => Navigator.pop(context, false),
                       child: Text(
                         'Cancel',
-                        style: GoogleFonts.montserrat(
-                          fontSize: isLargeScreen ? 16 : 14,
-                          color: AppTheme.roseGold,
-                        ),
+                        style: GoogleFonts.montserrat(fontSize: 12, color: AppTheme.roseGold),
                       ),
                     ),
-                    SizedBox(width: isLargeScreen ? 16 : 8),
+                    const SizedBox(width: 8),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context, true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.deepRose,
                         foregroundColor: AppTheme.creamWhite,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isLargeScreen ? 24 : 16,
-                          vertical: isLargeScreen ? 16 : 12,
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       ),
                       child: Text(
                         'Delete',
-                        style: GoogleFonts.montserrat(
-                          fontSize: isLargeScreen ? 16 : 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: GoogleFonts.montserrat(fontSize: 12, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -374,16 +349,12 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           backgroundColor: AppTheme.deepRose,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          margin: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width > 600
-                ? MediaQuery.of(context).size.width * 0.3
-                : 16,
-            vertical: 16,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         ),
       );
     }
+    return shouldDelete;
   }
 
   void _toggleTaskCompletion(TaskModel task) async {
@@ -404,14 +375,11 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final isLargeScreen = screenWidth > 600;
-    final fontScaleFactor = isLargeScreen ? 1.3 : 1.0;
-    final verticalSpacing = screenHeight * (isLargeScreen ? 0.03 : 0.02);
-    final horizontalPadding = screenWidth * (isLargeScreen ? 0.1 : 0.05);
-    final taskItemPadding = screenWidth * (isLargeScreen ? 0.04 : 0.03);
+    final verticalSpacing = screenHeight * 0.015;
+    final horizontalPadding = screenWidth * 0.04;
+    final taskItemPadding = screenWidth * 0.02;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       backgroundColor: AppTheme.creamWhite,
       appBar: AppBar(
         title: Directionality(
@@ -419,7 +387,7 @@ class HomeScreenState extends State<HomeScreen> {
           child: Text(
             'Rozana Ke Kaam',
             style: GoogleFonts.montserrat(
-              fontSize: isLargeScreen ? 28 : 22,
+              fontSize: 20,
               color: AppTheme.deepRose,
               fontWeight: FontWeight.w700,
             ),
@@ -428,376 +396,321 @@ class HomeScreenState extends State<HomeScreen> {
         backgroundColor: AppTheme.creamWhite,
         elevation: 0,
       ),
-      body: Container(
-        constraints: const BoxConstraints.expand(),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.creamWhite,
-              AppTheme.softPink.withValues(alpha: 0.4),
-              AppTheme.roseGold.withValues(alpha: 0.2),
-            ],
-            stops: const [0.0, 0.7, 1.0],
-          ),
-          image: const DecorationImage(
-            image: AssetImage('assets/images/backgrounds/bg-1.jpg'),
-            fit: BoxFit.cover,
-            opacity: 0.3,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: horizontalPadding,
-                vertical: verticalSpacing * 0.5,
-              ),
-              decoration: BoxDecoration(
-                color: AppTheme.creamWhite.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.roseGold, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.softPink.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TableCalendar(
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                calendarFormat: _calendarFormat,
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
-                    _focusedDay = DateTime(focusedDay.year, focusedDay.month, focusedDay.day);
-                  });
-                },
-                onFormatChanged: (format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
-                },
-                calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: AppTheme.roseGold.withValues(alpha: 0.5),
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: AppTheme.roseGold,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppTheme.deepRose, width: 2),
-                  ),
-                  selectedTextStyle: GoogleFonts.montserrat(
-                    color: AppTheme.creamWhite,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  defaultTextStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
-                  outsideTextStyle: GoogleFonts.montserrat(color: AppTheme.vintageSepia.withValues(alpha: 0.5)),
-                  weekendTextStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
-                ),
-                headerStyle: HeaderStyle(
-                  titleTextStyle: GoogleFonts.montserrat(
-                    fontSize: isLargeScreen ? 20 : 16,
-                    color: AppTheme.deepRose,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  formatButtonVisible: true,
-                  formatButtonShowsNext: false,
-                  formatButtonDecoration: BoxDecoration(
-                    border: Border.all(color: AppTheme.roseGold),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  formatButtonTextStyle: GoogleFonts.montserrat(
-                    color: AppTheme.roseGold,
-                    fontSize: isLargeScreen ? 16 : 14,
-                  ),
-                  leftChevronIcon: Icon(
-                    Icons.chevron_left,
-                    size: isLargeScreen ? 28 : 24,
-                    color: AppTheme.roseGold,
-                  ),
-                  rightChevronIcon: Icon(
-                    Icons.chevron_right,
-                    size: isLargeScreen ? 28 : 24,
-                    color: AppTheme.roseGold,
-                  ),
-                ),
-                daysOfWeekStyle: DaysOfWeekStyle(
-                  weekdayStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
-                  weekendStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
-                ),
-              ),
-            ),
-            SizedBox(height: verticalSpacing * 0.5),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Directionality(
-                    textDirection: _getTextDirection('Tasks for ${DateFormat('MMMM d, y').format(_selectedDay)}'),
-                    child: Text(
-                      'Tasks for ${DateFormat('MMMM d, y').format(_selectedDay)}',
-                      style: GoogleFonts.montserrat(
-                        fontSize: isLargeScreen ? 20 : 16,
-                        color: AppTheme.deepRose,
-                        fontWeight: FontWeight.w600,
-                      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalSpacing * 0.5),
+                decoration: BoxDecoration(
+                  color: AppTheme.creamWhite.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.roseGold, width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.softPink.withOpacity(0.3),
+                      blurRadius: 6,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 2),
                     ),
+                  ],
+                ),
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: _focusedDay,
+                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                  calendarFormat: _calendarFormat,
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+                      _focusedDay = DateTime(focusedDay.year, focusedDay.month, focusedDay.day);
+                    });
+                  },
+                  onFormatChanged: (format) {
+                    setState(() {
+                      _calendarFormat = format;
+                    });
+                  },
+                  calendarStyle: CalendarStyle(
+                    todayDecoration: BoxDecoration(
+                      color: AppTheme.roseGold.withOpacity(0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    selectedDecoration: BoxDecoration(
+                      color: AppTheme.roseGold,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.deepRose, width: 1.8),
+                    ),
+                    selectedTextStyle: GoogleFonts.montserrat(
+                      color: AppTheme.creamWhite,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    defaultTextStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
+                    outsideTextStyle: GoogleFonts.montserrat(color: AppTheme.vintageSepia.withOpacity(0.5)),
+                    weekendTextStyle: GoogleFonts.montserrat(color: AppTheme.deepRose),
                   ),
-                  ValueListenableBuilder<Box<TaskModel>>(
-                    valueListenable: Hive.box<TaskModel>('tasks').listenable(),
-                    builder: (context, box, _) {
-                      final taskCount = box.values
-                          .where((task) => isSameDay(task.endDate, _selectedDay))
-                          .length;
-                      return Chip(
-                        backgroundColor: AppTheme.roseGold.withValues(alpha: 0.2),
-                        label: Text(
-                          '$taskCount',
+                  headerStyle: HeaderStyle(
+                    titleTextStyle: GoogleFonts.montserrat(
+                      fontSize: 14,
+                      color: AppTheme.deepRose,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    formatButtonVisible: true,
+                    formatButtonShowsNext: false,
+                    formatButtonDecoration: BoxDecoration(
+                      border: Border.all(color: AppTheme.roseGold),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    formatButtonTextStyle: GoogleFonts.montserrat(color: AppTheme.roseGold, fontSize: 12),
+                    leftChevronIcon: const Icon(Icons.chevron_left, size: 20, color: AppTheme.roseGold),
+                    rightChevronIcon: const Icon(Icons.chevron_right, size: 20, color: AppTheme.roseGold),
+                  ),
+                  daysOfWeekStyle: DaysOfWeekStyle(
+                    weekdayStyle: GoogleFonts.montserrat(color: AppTheme.deepRose, fontSize: 12),
+                    weekendStyle: GoogleFonts.montserrat(color: AppTheme.deepRose, fontSize: 12),
+                  ),
+                ),
+              ),
+              SizedBox(height: verticalSpacing * 0.5),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Directionality(
+                        textDirection: _getTextDirection(
+                          'Tasks for ${DateFormat('MMM d, y').format(_selectedDay)}',
+                        ),
+                        child: Text(
+                          'Tasks for ${DateFormat('MMM d, y').format(_selectedDay)}',
                           style: GoogleFonts.montserrat(
+                            fontSize: 14,
                             color: AppTheme.deepRose,
                             fontWeight: FontWeight.w600,
                           ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          side: const BorderSide(color: AppTheme.roseGold),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isLargeScreen ? 12 : 8,
-                          vertical: isLargeScreen ? 8 : 4,
-                        ),
-                        labelPadding: EdgeInsets.symmetric(
-                          horizontal: isLargeScreen ? 8 : 4,
+                      ),
+                    ),
+                    ValueListenableBuilder<Box<TaskModel>>(
+                      valueListenable: Hive.box<TaskModel>('tasks').listenable(),
+                      builder: (context, box, _) {
+                        final taskCount = box.values
+                            .where((task) => isSameDay(task.endDate, _selectedDay))
+                            .length;
+                        return Chip(
+                          backgroundColor: AppTheme.roseGold.withOpacity(0.2),
+                          label: Text(
+                            '$taskCount',
+                            style: GoogleFonts.montserrat(
+                              color: AppTheme.deepRose,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            ),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: const BorderSide(color: AppTheme.roseGold),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                          labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: verticalSpacing * 0.5),
+              Container(
+                child: ValueListenableBuilder<Box<TaskModel>>(
+                  valueListenable: Hive.box<TaskModel>('tasks').listenable(),
+                  builder: (context, box, _) {
+                    final tasks = box.values.where((task) => isSameDay(task.endDate, _selectedDay)).toList()
+                      ..sort((a, b) => a.endDate.compareTo(b.endDate));
+
+                    if (tasks.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.assignment_outlined,
+                              size: 40,
+                              color: AppTheme.roseGold.withOpacity(0.5),
+                            ),
+                            const SizedBox(height: 12),
+                            Directionality(
+                              textDirection: _getTextDirection('No tasks for this day'),
+                              child: Text(
+                                'No tasks for this day',
+                                style: GoogleFonts.montserrat(fontSize: 14, color: AppTheme.deepRose),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Directionality(
+                              textDirection: _getTextDirection('Tap + to add a new task'),
+                              child: Text(
+                                'Tap + to add a new task',
+                                style: GoogleFonts.montserrat(fontSize: 12, color: AppTheme.vintageSepia),
+                              ),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: verticalSpacing * 0.5),
-            Expanded(
-              child: ValueListenableBuilder<Box<TaskModel>>(
-                valueListenable: Hive.box<TaskModel>('tasks').listenable(),
-                builder: (context, box, _) {
-                  final tasks = box.values
-                      .where((task) => isSameDay(task.endDate, _selectedDay))
-                      .toList()
-                    ..sort((a, b) => a.endDate.compareTo(b.endDate));
+                    }
 
-                  if (tasks.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.assignment_outlined,
-                            size: isLargeScreen ? 64 : 48,
-                            color: AppTheme.roseGold.withValues(alpha: 0.5),
-                          ),
-                          SizedBox(height: isLargeScreen ? 24 : 16),
-                          Directionality(
-                            textDirection: _getTextDirection('No tasks for this day'),
-                            child: Text(
-                              'No tasks for this day',
-                              style: GoogleFonts.montserrat(
-                                fontSize: isLargeScreen ? 20 : 16,
-                                color: AppTheme.deepRose,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: isLargeScreen ? 12 : 8),
-                          Directionality(
-                            textDirection: _getTextDirection('Tap + to add a new task'),
-                            child: Text(
-                              'Tap + to add a new task',
-                              style: GoogleFonts.montserrat(
-                                fontSize: isLargeScreen ? 16 : 14,
-                                color: AppTheme.vintageSepia,
-                              ),
-                            ),
-                          ),
-                        ],
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.only(
+                        bottom: verticalSpacing * 2,
+                        left: horizontalPadding,
+                        right: horizontalPadding,
                       ),
-                    );
-                  }
-
-                  return ListView.builder(
-                    padding: EdgeInsets.only(
-                      bottom: verticalSpacing * 2,
-                      left: horizontalPadding,
-                      right: horizontalPadding,
-                    ),
-                    itemCount: tasks.length,
-                    itemBuilder: (context, index) {
-                      final task = tasks[index];
-                      return Padding(
-                        padding: EdgeInsets.symmetric(vertical: taskItemPadding * 0.5),
-                        child: Dismissible(
-                          key: Key(task.id),
-                          background: Container(
-                            decoration: BoxDecoration(
-                              color: AppTheme.deepRose.withValues(alpha: 0.8),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: isLargeScreen ? 32 : 20),
-                            child: Icon(
-                              Icons.delete,
-                              color: AppTheme.creamWhite,
-                              size: isLargeScreen ? 28 : 24,
-                            ),
-                          ),
-                          direction: DismissDirection.endToStart,
-                          confirmDismiss: (direction) async {
-                            return await _deleteTask(task.id) != null;
-                          },
-                          child: Card(
-                            color: task.isCompleted
-                                ? AppTheme.creamWhite.withValues(alpha: 0.7)
-                                : AppTheme.creamWhite.withValues(alpha: 0.9),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(
-                                color: task.isCompleted
-                                    ? AppTheme.vintageSepia.withValues(alpha: 0.5)
-                                    : AppTheme.roseGold,
-                                width: 1.5,
+                      itemCount: tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = tasks[index];
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: taskItemPadding * 0.5),
+                          child: Dismissible(
+                            key: Key(task.id),
+                            background: Container(
+                              decoration: BoxDecoration(
+                                color: AppTheme.deepRose.withOpacity(0.8),
+                                borderRadius: BorderRadius.circular(10),
                               ),
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 16),
+                              child: Icon(Icons.delete, color: AppTheme.creamWhite, size: 20),
                             ),
-                            elevation: 4,
-                            shadowColor: AppTheme.softPink.withValues(alpha: 0.3),
-                            child: ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: taskItemPadding,
-                                vertical: isLargeScreen ? 16 : 12,
-                              ),
-                              leading: Checkbox(
-                                value: task.isCompleted,
-                                onChanged: (value) => _toggleTaskCompletion(task),
-                                activeColor: AppTheme.roseGold,
-                                checkColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
+                            direction: DismissDirection.endToStart,
+                            confirmDismiss: (direction) async {
+                              return await _deleteTask(task.id) ?? false;
+                            },
+                            child: Card(
+                              color: task.isCompleted
+                                  ? AppTheme.creamWhite.withOpacity(0.7)
+                                  : AppTheme.creamWhite.withOpacity(0.9),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                side: BorderSide(
+                                  color: task.isCompleted
+                                      ? AppTheme.vintageSepia.withOpacity(0.5)
+                                      : AppTheme.roseGold,
+                                  width: 1.2,
                                 ),
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
-                              title: Directionality(
-                                textDirection: _getTextDirection(task.title),
-                                child: Text(
-                                  task.title,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: isLargeScreen ? 18 : 16,
-                                    color: task.isCompleted
-                                        ? AppTheme.vintageSepia
-                                        : AppTheme.deepRose,
-                                    fontWeight: FontWeight.w600,
-                                    decoration: task.isCompleted
-                                        ? TextDecoration.lineThrough
-                                        : null,
+                              elevation: 3,
+                              shadowColor: AppTheme.softPink.withOpacity(0.3),
+                              child: ListTile(
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: taskItemPadding,
+                                  vertical: 8,
+                                ),
+                                leading: Checkbox(
+                                  value: task.isCompleted,
+                                  onChanged: (value) => _toggleTaskCompletion(task),
+                                  activeColor: AppTheme.roseGold,
+                                  checkColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                title: Directionality(
+                                  textDirection: _getTextDirection(task.title),
+                                  child: Text(
+                                    task.title,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 14,
+                                      color: task.isCompleted ? AppTheme.vintageSepia : AppTheme.deepRose,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  if (task.details.isNotEmpty) ...[
-                                    SizedBox(height: isLargeScreen ? 8 : 4),
-                                    Directionality(
-                                      textDirection: _getTextDirection(task.details),
-                                      child: Text(
-                                        task.details,
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: isLargeScreen ? 16 : 14,
-                                          color: AppTheme.vintageSepia,
-                                          decoration: task.isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
-                                        maxLines: isLargeScreen ? 3 : 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                  SizedBox(height: isLargeScreen ? 8 : 4),
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.calendar_today,
-                                        size: isLargeScreen ? 16 : 12,
-                                        color: AppTheme.vintageSepia,
-                                      ),
-                                      SizedBox(width: isLargeScreen ? 8 : 4),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    if (task.details.isNotEmpty) ...[
+                                      const SizedBox(height: 4),
                                       Directionality(
-                                        textDirection: _getTextDirection(DateFormat('MMM d, y').format(task.endDate)),
+                                        textDirection: _getTextDirection(task.details),
                                         child: Text(
-                                          DateFormat('MMM d, y').format(task.endDate),
+                                          task.details,
                                           style: GoogleFonts.montserrat(
-                                            fontSize: isLargeScreen ? 14 : 12,
+                                            fontSize: 12,
                                             color: AppTheme.vintageSepia,
+                                            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
                                           ),
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Icon(
-                                        Icons.person_outline,
-                                        size: isLargeScreen ? 16 : 12,
-                                        color: AppTheme.vintageSepia,
-                                      ),
-                                      SizedBox(width: isLargeScreen ? 8 : 4),
-                                      Directionality(
-                                        textDirection: _getTextDirection(task.editedBy),
-                                        child: Text(
-                                          task.editedBy.split('@')[0],
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: isLargeScreen ? 14 : 12,
-                                            color: AppTheme.vintageSepia,
-                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
                                     ],
-                                  ),
-                                ],
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(
-                                  Icons.edit,
-                                  color: AppTheme.roseGold,
-                                  size: isLargeScreen ? 28 : 24,
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 12, color: AppTheme.vintageSepia),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Directionality(
+                                            textDirection: _getTextDirection(
+                                              DateFormat('MMM d, y').format(task.endDate),
+                                            ),
+                                            child: Text(
+                                              DateFormat('MMM d, y').format(task.endDate),
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 10,
+                                                color: AppTheme.vintageSepia,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(Icons.person_outline, size: 12, color: AppTheme.vintageSepia),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Directionality(
+                                            textDirection: _getTextDirection(task.editedBy),
+                                            child: Text(
+                                              task.editedBy.split('@')[0],
+                                              style: GoogleFonts.montserrat(
+                                                fontSize: 10,
+                                                color: AppTheme.vintageSepia,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                onPressed: () => _showAddEditTaskDialog(task: task),
+                                trailing: IconButton(
+                                  icon: Icon(Icons.edit, color: AppTheme.roseGold, size: 20),
+                                  onPressed: () => _showAddEditTaskDialog(task: task),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddEditTaskDialog(),
         backgroundColor: AppTheme.roseGold,
-        elevation: 4,
+        elevation: 3,
         tooltip: 'Add Task',
-        child: Icon(
-          Icons.add,
-          color: AppTheme.creamWhite,
-          size: isLargeScreen ? 32 : 28,
-        ),
+        child: Icon(Icons.add, color: AppTheme.creamWhite, size: 24),
       ),
     );
   }

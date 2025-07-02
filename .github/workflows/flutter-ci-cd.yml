@@ -2,9 +2,9 @@ name: Romantic App CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   FLUTTER_VERSION: "3.22.4" # Your specific version
@@ -67,7 +67,7 @@ jobs:
       
       - name: Upload Coverage
         uses: codecov/codecov-action@v3
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
 
   build:
     name: Build APK
@@ -101,7 +101,7 @@ jobs:
 
   release:
     name: Create Release
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     

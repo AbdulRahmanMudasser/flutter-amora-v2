@@ -17,9 +17,10 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    final fontScaleFactor = screenWidth > 600 ? 1.2 : 0.85;
-    final verticalSpacing = screenHeight * 0.02;
-    final horizontalPadding = screenWidth * 0.02;
+    final isLargeScreen = screenWidth > 600;
+    final fontScaleFactor = isLargeScreen ? 1.3 : 1.0;
+    final verticalSpacing = screenHeight * (isLargeScreen ? 0.03 : 0.02);
+    final horizontalPadding = screenWidth * (isLargeScreen ? 0.1 : 0.05);
 
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
@@ -46,7 +47,12 @@ class ProfileScreen extends StatelessWidget {
           future: Hive.openBox<UserModel>('users'),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: AppTheme.roseGold));
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: AppTheme.roseGold,
+                  strokeWidth: 2.5,
+                ),
+              );
             }
             if (snapshot.hasError || !snapshot.hasData) {
               return Center(
@@ -55,7 +61,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Text(
                     'Error loading profile',
                     style: GoogleFonts.montserrat(
-                      fontSize: 18 * fontScaleFactor,
+                      fontSize: isLargeScreen ? 22 : 18,
                       color: AppTheme.deepRose,
                       fontWeight: FontWeight.w500,
                     ),
@@ -66,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
 
             final userBox = snapshot.data!;
             final user = userBox.values.firstWhere(
-                  (user) => user.email == email,
+              (user) => user.email == email,
               orElse: () => UserModel(
                 id: '',
                 username: 'Unknown',
@@ -79,86 +85,118 @@ class ProfileScreen extends StatelessWidget {
             );
 
             return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: verticalSpacing * 2,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: verticalSpacing * 2, bottom: verticalSpacing),
-                      constraints: BoxConstraints(
-                        maxHeight: screenHeight * 0.18,
-                        maxWidth: screenWidth * 0.85,
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: verticalSpacing,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(height: verticalSpacing * 2),
+                  Container(
+                    constraints: BoxConstraints(
+                      maxHeight: screenHeight * 0.25,
+                      maxWidth: screenWidth * 0.85,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.roseGold, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.softPink.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(18),
+                      child: Image.asset(
+                        'assets/images/login.jpg',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          debugPrint('Error loading header: $error');
+                          return Container(
+                            color: AppTheme.softPink.withValues(alpha: 0.2),
+                            child: Icon(
+                              Icons.favorite,
+                              size: screenWidth * 0.15,
+                              color: AppTheme.roseGold,
+                            ),
+                          );
+                        },
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.roseGold, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.softPink.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 2),
+                    ),
+                  ),
+                  SizedBox(height: verticalSpacing),
+                  Directionality(
+                    textDirection: _getTextDirection('Your Love Profile'),
+                    child: Text(
+                      'Your Love Profile',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 26 * fontScaleFactor,
+                        color: AppTheme.deepRose,
+                        fontWeight: FontWeight.w700,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 3,
+                            color: AppTheme.roseGold.withValues(alpha: 0.3),
+                            offset: const Offset(1, 1),
                           ),
                         ],
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(18),
-                        child: Image.asset(
-                          'assets/images/login.jpg',
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            debugPrint('Error loading header: $error');
-                            return Container(
-                              color: AppTheme.softPink.withValues(alpha: 0.2),
-                              child: Icon(
-                                Icons.favorite,
-                                size: screenWidth * 0.15,
-                                color: AppTheme.roseGold,
-                              ),
-                            );
-                          },
+                    ),
+                  ),
+                  SizedBox(height: verticalSpacing),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.favorite,
+                        size: isLargeScreen ? 28 : 20,
+                        color: AppTheme.roseGold,
+                      ),
+                      SizedBox(width: isLargeScreen ? 16 : 8),
+                      const Expanded(
+                        child: Divider(
+                          color: AppTheme.roseGold,
+                          thickness: 1.5,
+                          height: 1,
                         ),
                       ),
-                    ),
-                    SizedBox(height: verticalSpacing),
-                    Directionality(
-                      textDirection: _getTextDirection('Your Love Profile'),
-                      child: Text(
-                        'Your Love Profile',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 26 * fontScaleFactor,
-                          color: AppTheme.deepRose,
-                          fontWeight: FontWeight.w700,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 3,
-                              color: AppTheme.roseGold.withValues(alpha: 0.3),
-                              offset: const Offset(1, 1),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
+                      SizedBox(width: isLargeScreen ? 16 : 8),
+                      Icon(
+                        Icons.favorite,
+                        size: isLargeScreen ? 28 : 20,
+                        color: AppTheme.roseGold,
                       ),
+                    ],
+                  ),
+                  SizedBox(height: verticalSpacing * 2),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isLargeScreen ? screenWidth * 0.1 : screenWidth * 0.05,
+                      vertical: isLargeScreen ? 32 : 24,
                     ),
-                    SizedBox(height: verticalSpacing),
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.favorite, size: 20, color: AppTheme.roseGold),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Divider(color: AppTheme.roseGold, thickness: 1),
+                    decoration: BoxDecoration(
+                      color: AppTheme.creamWhite.withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppTheme.roseGold,
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.softPink.withValues(alpha: 0.2),
+                          blurRadius: 15,
+                          spreadRadius: 5,
+                          offset: const Offset(0, 5),
                         ),
-                        SizedBox(width: 8),
-                        Icon(Icons.favorite, size: 20, color: AppTheme.roseGold),
                       ],
                     ),
-                    SizedBox(height: verticalSpacing * 2),
-                    Padding(
+                    child: Padding(
                       padding: EdgeInsets.all(screenWidth * 0.05),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,9 +273,9 @@ class ProfileScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: verticalSpacing * 2),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: verticalSpacing * 2),
+                ],
               ),
             );
           },
@@ -247,13 +285,13 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileItem(
-      BuildContext context, {
-        required String label,
-        required String value,
-        required double fontScaleFactor,
-      }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    BuildContext context, {
+    required String label,
+    required String value,
+    required double fontScaleFactor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Directionality(
           textDirection: _getTextDirection(label),
@@ -261,23 +299,22 @@ class ProfileScreen extends StatelessWidget {
             label,
             style: GoogleFonts.montserrat(
               fontSize: 16 * fontScaleFactor,
-              color: AppTheme.deepRose,
+              color: AppTheme.deepRose.withValues(alpha: 0.8),
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        Flexible(
-          child: Directionality(
-            textDirection: _getTextDirection(value),
-            child: Text(
-              value,
-              style: GoogleFonts.montserrat(
-                fontSize: 16 * fontScaleFactor,
-                color: AppTheme.vintageSepia,
-              ),
-              textAlign: TextAlign.end,
-              overflow: TextOverflow.ellipsis,
+        SizedBox(height: 4),
+        Directionality(
+          textDirection: _getTextDirection(value),
+          child: Text(
+            value,
+            style: GoogleFonts.montserrat(
+              fontSize: 14 * fontScaleFactor,
+              color: AppTheme.vintageSepia,
             ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
         ),
       ],

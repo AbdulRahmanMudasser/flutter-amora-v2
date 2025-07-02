@@ -182,9 +182,9 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                     Padding(
                       padding: EdgeInsets.only(top: verticalSpacing * 2, bottom: verticalSpacing),
                       child: Text(
-                        'Welcome Back, Love',
+                        'Welcome Back, Asad Ki Duniya',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: 22 * fontScaleFactor,
+                          fontSize: 20 * fontScaleFactor,
                           fontWeight: FontWeight.w700,
                           color: AppTheme.deepRose,
                           shadows: [

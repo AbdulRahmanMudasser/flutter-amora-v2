@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:amora/core/theme/theme.dart';
 import 'package:amora/features/authentication/data/models/user_model.dart';
 import 'package:amora/features/authentication/presentation/screens/login_screen.dart';
+import 'features/authentication/presentation/screens/splash_screen.dart'; // Import the SplashScreen
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,7 +53,7 @@ class MyApp extends StatelessWidget {
         Locale('en', ''), // English
         Locale('ur', ''), // Urdu
       ],
-      home: const LoginScreen(),
+      home: const SplashScreen(), // Set SplashScreen as the initial screen
       debugShowCheckedModeBanner: false,
     );
   }

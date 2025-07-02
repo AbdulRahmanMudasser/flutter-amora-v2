@@ -236,48 +236,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: verticalSpacing * 2),
-                    FractionallySizedBox(
-                      widthFactor: 0.98,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/edit_profile', arguments: email);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.roseGold,
-                          foregroundColor: AppTheme.creamWhite,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.1,
-                            vertical: screenHeight * 0.02,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
-                          ),
-                          elevation: 4,
-                          shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.edit,
-                              size: 18 * fontScaleFactor,
-                              color: AppTheme.creamWhite,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Edit Profile',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16 * fontScaleFactor,
-                                color: AppTheme.creamWhite,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: verticalSpacing * 2),
                   ],
                 ),
               ),

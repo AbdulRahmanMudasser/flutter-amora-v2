@@ -27,7 +27,7 @@ class MainScreenState extends State<MainScreen> {
     _screens = [
       HomeScreen(email: widget.initialEmail),
       ProfileScreen(email: widget.initialEmail),
-      WriteScreen(email: widget.initialEmail),
+      const WriteScreen(),
       MemoriesScreen(email: widget.initialEmail),
       SettingsScreen(email: widget.initialEmail),
     ];

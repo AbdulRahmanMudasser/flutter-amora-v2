@@ -2,9 +2,9 @@ name: Romantic App CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
 
 env:
   FLUTTER_VERSION: "3.22.1"  # Confirmed stable version
@@ -64,7 +64,7 @@ jobs:
           flutter test --coverage
       
       - name: Upload Coverage
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         uses: codecov/codecov-action@v3
 
   build:
@@ -91,7 +91,7 @@ jobs:
 
   release:
     name: Create GitHub Release
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     steps:

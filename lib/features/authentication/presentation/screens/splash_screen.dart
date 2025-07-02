@@ -155,7 +155,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'A World of Love and Memories',
+                        "Sirf Asad or Asad Ki Dunyia",
                         style: GoogleFonts.montserrat(
                           fontSize: subtitleFontSize,
                           color: AppTheme.vintageSepia,

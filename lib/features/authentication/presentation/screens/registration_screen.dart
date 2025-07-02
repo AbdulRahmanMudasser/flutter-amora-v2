@@ -70,7 +70,7 @@ class RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                     Padding(
                       padding: EdgeInsets.only(top: verticalSpacing * 2, bottom: verticalSpacing),
                       child: Text(
-                        'ASAD KI DUNIYA',
+                        'Asad Ki Duniya',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontSize: 22 * fontScaleFactor,
                           fontWeight: FontWeight.w700,

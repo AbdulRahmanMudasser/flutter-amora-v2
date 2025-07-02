@@ -1,11 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+
+import 'package:amora/core/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:path_provider/path_provider.dart';
-import 'dart:convert';
-import 'package:amora/core/theme/theme.dart';
-import 'package:amora/features/dashboard/presentation/screens/write_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 
 class MemoryMetadata {
@@ -83,7 +83,7 @@ class ImageViewScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.share, color: AppTheme.deepRose),
+            icon: const Icon(Icons.share, color: AppTheme.deepRose),
             onPressed: () => _shareMemory(context),
           ),
         ],
@@ -100,8 +100,8 @@ class ImageViewScreen extends StatelessWidget {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error, color: AppTheme.roseGold, size: 50),
-                  SizedBox(height: 16),
+                  const Icon(Icons.error, color: AppTheme.roseGold, size: 50),
+                  const SizedBox(height: 16),
                   Text(
                     'Could not load image',
                     style: GoogleFonts.montserrat(color: AppTheme.deepRose),
@@ -119,7 +119,7 @@ class ImageViewScreen extends StatelessWidget {
 class MemoriesScreen extends StatefulWidget {
   final String email;
 
-  const MemoriesScreen({Key? key, required this.email}) : super(key: key);
+  const MemoriesScreen({super.key, required this.email});
 
   @override
   MemoriesScreenState createState() => MemoriesScreenState();
@@ -258,7 +258,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
             size: isMobile ? 60 : 80,
             color: AppTheme.roseGold,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Directionality(
             textDirection: _getTextDirection('No memories yet'),
             child: Text(
@@ -269,7 +269,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Directionality(
             textDirection: _getTextDirection('Create your first memory in the Write section!'),
             child: Text(
@@ -294,7 +294,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppTheme.roseGold, width: 1),
+        side: const BorderSide(color: AppTheme.roseGold, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,14 +303,14 @@ class MemoriesScreenState extends State<MemoriesScreen> {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   child: Image.file(
                     File(memory.imagePath),
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: AppTheme.softPink.withOpacity(0.2),
-                        child: Center(
+                        color: AppTheme.softPink.withValues(alpha: 0.2),
+                        child: const Center(
                           child: Icon(
                             Icons.broken_image,
                             color: AppTheme.roseGold,
@@ -374,7 +374,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Directionality(
                   textDirection: _getTextDirection('By ${memory.editedBy}'),
                   child: Text(
@@ -385,7 +385,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Directionality(
                   textDirection: _getTextDirection(formattedDate),
                   child: Text(
@@ -420,7 +420,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
               end: Alignment.bottomRight,
               colors: [
                 AppTheme.creamWhite,
-                AppTheme.softPink.withOpacity(0.2),
+                AppTheme.softPink.withValues(alpha: 0.2),
               ],
             ),
             image: const DecorationImage(
@@ -447,15 +447,15 @@ class MemoriesScreenState extends State<MemoriesScreen> {
                     hintText: 'Search by name, editor, or date...',
                     hintStyle: GoogleFonts.montserrat(
                       fontSize: isMobile ? 14 : 16,
-                      color: AppTheme.deepRose.withOpacity(0.6),
+                      color: AppTheme.deepRose.withValues(alpha: 0.6),
                     ),
-                    prefixIcon: Icon(Icons.search, color: AppTheme.roseGold),
+                    prefixIcon: const Icon(Icons.search, color: AppTheme.roseGold),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.roseGold),
+                      borderSide: const BorderSide(color: AppTheme.roseGold),
                     ),
                     filled: true,
-                    fillColor: AppTheme.creamWhite.withOpacity(0.85),
+                    fillColor: AppTheme.creamWhite.withValues(alpha: 0.85),
                   ),
                 ),
               ),
@@ -464,7 +464,7 @@ class MemoriesScreenState extends State<MemoriesScreen> {
                   future: _loadMemories(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(color: AppTheme.roseGold),
                       );
                     }
@@ -474,8 +474,8 @@ class MemoriesScreenState extends State<MemoriesScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.error, color: AppTheme.roseGold, size: 40),
-                            SizedBox(height: 16),
+                            const Icon(Icons.error, color: AppTheme.roseGold, size: 40),
+                            const SizedBox(height: 16),
                             Directionality(
                               textDirection: _getTextDirection('Error loading memories'),
                               child: Text(

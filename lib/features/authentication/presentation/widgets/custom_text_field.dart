@@ -78,7 +78,7 @@ class CustomTextFieldState extends State<CustomTextField> {
           )
               : null,
           filled: true,
-          fillColor: AppTheme.softPink.withOpacity(0.2),
+          fillColor: AppTheme.softPink.withValues(alpha: 0.2),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppTheme.roseGold, width: 1.5),

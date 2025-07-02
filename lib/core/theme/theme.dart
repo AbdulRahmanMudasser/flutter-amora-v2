@@ -53,7 +53,7 @@
 
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: softPink.withOpacity(0.2),
+          fillColor: softPink.withValues(alpha: 0.2),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: roseGold, width: 1),
@@ -67,7 +67,7 @@
             borderSide: const BorderSide(color: deepRose, width: 2),
           ),
           labelStyle: GoogleFonts.montserrat(color: vintageSepia, fontSize: 14),
-          hintStyle: GoogleFonts.montserrat(color: vintageSepia.withOpacity(0.6), fontSize: 14),
+          hintStyle: GoogleFonts.montserrat(color: vintageSepia.withValues(alpha: 0.6), fontSize: 14),
         ),
 
         cardTheme: CardThemeData(
@@ -77,7 +77,7 @@
             borderRadius: BorderRadius.circular(16),
             side: const BorderSide(color: softPink, width: 1),
           ),
-          shadowColor: roseGold.withOpacity(0.3),
+          shadowColor: roseGold.withValues(alpha: 0.3),
         ),
 
         appBarTheme: AppBarTheme(

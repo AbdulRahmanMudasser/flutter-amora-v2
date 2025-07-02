@@ -17,7 +17,7 @@ class RichTextEditor extends StatefulWidget {
   final VoidCallback resetTextPosition;
 
   const RichTextEditor({
-    Key? key,
+    super.key,
     required this.wordStyles,
     required this.onTextChanged,
     required this.fontSize,
@@ -27,7 +27,7 @@ class RichTextEditor extends StatefulWidget {
     required this.onPositionChanged,
     required this.textPosition,
     required this.resetTextPosition,
-  }) : super(key: key);
+  });
 
   @override
   _RichTextEditorState createState() => _RichTextEditorState();
@@ -62,14 +62,14 @@ class _RichTextEditorState extends State<RichTextEditor> {
     ];
 
     return AnimatedPositioned(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       bottom: _showColorPalette ? 10 : -100,
       right: 10,
       child: Material(
         elevation: 4,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -80,7 +80,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: Icon(Icons.close),
+                    icon: const Icon(Icons.close),
                     onPressed: () => setState(() => _showColorPalette = false),
                   ),
                 ],
@@ -142,10 +142,10 @@ class _RichTextEditorState extends State<RichTextEditor> {
                 maxWidth: MediaQuery.of(context).size.width * 0.8,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
+                color: Colors.white.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(8),
               ),
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -166,7 +166,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
 
                       widget.onTextChanged(newWordStyles);
                     },
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'Type your text here...',
                       border: InputBorder.none,
                     ),
@@ -177,7 +177,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   ),
                   if (widget.wordStyles.isNotEmpty)
                     Padding(
-                      padding: EdgeInsets.only(top: 8),
+                      padding: const EdgeInsets.only(top: 8),
                       child: RichText(
                         text: TextSpan(
                           children: [
@@ -194,7 +194,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                                       ? FontStyle.italic
                                       : FontStyle.normal,
                                   backgroundColor: _selectedWordIndex == i
-                                      ? Colors.yellow.withOpacity(0.3)
+                                      ? Colors.yellow.withValues(alpha: 0.3)
                                       : Colors.transparent,
                                 ),
                                 recognizer: TapGestureRecognizer()

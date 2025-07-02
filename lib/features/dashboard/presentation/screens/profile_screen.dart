@@ -72,7 +72,7 @@ class ProfileScreen extends StatelessWidget {
 
             final userBox = snapshot.data!;
             final user = userBox.values.firstWhere(
-                  (user) => user.email == email,
+              (user) => user.email == email,
               orElse: () => UserModel(
                 id: '',
                 username: 'Unknown',
@@ -113,10 +113,10 @@ class ProfileScreen extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18),
                       child: Image.asset(
-                        'assets/images/otp.jpg',
+                        'assets/images/login.jpg',
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          debugPrint('Error loading image: $error');
+                          debugPrint('Error loading header: $error');
                           return Container(
                             color: AppTheme.softPink.withValues(alpha: 0.2),
                             child: Icon(
@@ -129,24 +129,23 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: verticalSpacing * 2),
+                  SizedBox(height: verticalSpacing),
                   Directionality(
-                    textDirection: _getTextDirection('Hamari Private Information'),
+                    textDirection: _getTextDirection('Your Love Profile'),
                     child: Text(
-                      'Hamari Private Information',
+                      'Your Love Profile',
                       style: GoogleFonts.montserrat(
-                        fontSize: isLargeScreen ? 28 : 22,
+                        fontSize: 26 * fontScaleFactor,
                         color: AppTheme.deepRose,
                         fontWeight: FontWeight.w700,
                         shadows: [
                           Shadow(
-                            blurRadius: 4,
+                            blurRadius: 3,
                             color: AppTheme.roseGold.withValues(alpha: 0.3),
-                            offset: const Offset(2, 2),
+                            offset: const Offset(1, 1),
                           ),
                         ],
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                   SizedBox(height: verticalSpacing),
@@ -202,84 +201,104 @@ class ProfileScreen extends StatelessWidget {
                       children: [
                         _buildProfileItem(
                           context,
-                          icon: Icons.person_outline,
                           label: 'Username',
                           value: user.username,
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.email_outlined,
                           label: 'Email',
                           value: user.email,
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.verified_user_outlined,
                           label: 'Role',
                           value: user.role,
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.favorite_border,
                           label: 'Our Special Word',
                           value: user.secretWord,
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.credit_card_outlined,
                           label: 'CNIC',
                           value: user.cnic ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.airplane_ticket_outlined,
                           label: 'Passport',
                           value: user.passport ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.phone_iphone_outlined,
                           label: 'Phone Numbers',
                           value: user.phoneNumbers?.join(', ') ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.article_outlined,
                           label: 'Nikkah Nama',
                           value: user.nikkahNama ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.cake_outlined,
                           label: 'Husband Birthday',
                           value: user.husbandBirthday ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
-                        SizedBox(height: verticalSpacing * 1.5),
+                        SizedBox(height: verticalSpacing),
                         _buildProfileItem(
                           context,
-                          icon: Icons.cake_outlined,
                           label: 'Wife Birthday',
                           value: user.wifeBirthday ?? 'Not set',
-                          isLargeScreen: isLargeScreen,
+                          fontScaleFactor: fontScaleFactor,
                         ),
                       ],
+                    ),
+                  ),
+                  SizedBox(height: verticalSpacing * 2),
+                  FractionallySizedBox(
+                    widthFactor: 0.98,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/edit_profile', arguments: email);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.roseGold,
+                        foregroundColor: AppTheme.creamWhite,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.1,
+                          vertical: screenHeight * 0.02,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: AppTheme.deepRose, width: 1.5),
+                        ),
+                        elevation: 4,
+                        shadowColor: AppTheme.softPink.withValues(alpha: 0.4),
+                      ),
+                      child: Text(
+                        'Edit Profile',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16 * fontScaleFactor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: verticalSpacing * 3),
@@ -293,50 +312,36 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileItem(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required String value,
-        required bool isLargeScreen,
-      }) {
-    return Row(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required double fontScaleFactor,
+  }) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          icon,
-          size: isLargeScreen ? 28 : 22,
-          color: AppTheme.roseGold,
+        Directionality(
+          textDirection: _getTextDirection(label),
+          child: Text(
+            label,
+            style: GoogleFonts.montserrat(
+              fontSize: 16 * fontScaleFactor,
+              color: AppTheme.deepRose.withValues(alpha: 0.8),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
-        SizedBox(width: isLargeScreen ? 16 : 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Directionality(
-                textDirection: _getTextDirection(label),
-                child: Text(
-                  label,
-                  style: GoogleFonts.montserrat(
-                    fontSize: isLargeScreen ? 18 : 14,
-                    color: AppTheme.deepRose.withValues(alpha: 0.8),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              SizedBox(height: isLargeScreen ? 8 : 4),
-              Directionality(
-                textDirection: _getTextDirection(value),
-                child: Text(
-                  value,
-                  style: GoogleFonts.montserrat(
-                    fontSize: isLargeScreen ? 16 : 14,
-                    color: AppTheme.vintageSepia,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ),
-            ],
+        SizedBox(height: 4),
+        Directionality(
+          textDirection: _getTextDirection(value),
+          child: Text(
+            value,
+            style: GoogleFonts.montserrat(
+              fontSize: 14 * fontScaleFactor,
+              color: AppTheme.vintageSepia,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 2,
           ),
         ),
       ],

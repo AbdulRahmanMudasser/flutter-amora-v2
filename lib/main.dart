@@ -1,4 +1,7 @@
 import 'dart:io';
+
+import 'package:amora/core/theme/theme.dart';
+import 'package:amora/features/authentication/data/models/user_model.dart';
 import 'package:amora/features/dashboard/data/models/task_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:amora/core/theme/theme.dart';
-import 'package:amora/features/authentication/data/models/user_model.dart';
-import 'package:amora/features/authentication/presentation/screens/login_screen.dart';
+
 import 'features/authentication/presentation/screens/splash_screen.dart'; // Import the SplashScreen
 
 void main() async {

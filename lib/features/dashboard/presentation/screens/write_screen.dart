@@ -1,387 +1,672 @@
-import 'dart:io';
-import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
 import 'package:share_plus/share_plus.dart';
-import 'package:undo/undo.dart';
+import 'dart:io';
+import 'dart:ui' as dart_ui;
 import 'package:amora/core/theme/theme.dart';
-import 'package:amora/features/authentication/presentation/widgets/custom_text_field.dart';
 import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart';
 
-class MemoryMetadata {
-  final String name;
-  final String date;
-  final String imagePath;
-  final String editedBy;
-
-  MemoryMetadata({
-    required this.name,
-    required this.date,
-    required this.imagePath,
-    required this.editedBy,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'name': name,
-    'date': date,
-    'imagePath': imagePath,
-    'editedBy': editedBy,
-  };
-
-  factory MemoryMetadata.fromJson(Map<String, dynamic> json) => MemoryMetadata(
-    name: json['name'],
-    date: json['date'],
-    imagePath: json['imagePath'],
-    editedBy: json['editedBy'],
-  );
+// Temporary WordStyle model (replace with data/models/word_style.dart if provided)
+class WordStyle {
+  final String word;
+  final Color color;
+  WordStyle(this.word, this.color);
 }
 
 class WriteScreen extends StatefulWidget {
-  final String email;
-
-  const WriteScreen({Key? key, required this.email}) : super(key: key);
+  const WriteScreen({super.key});
 
   @override
-  WriteScreenState createState() => WriteScreenState();
+  State<WriteScreen> createState() => _WriteScreenState();
 }
 
-class WriteScreenState extends State<WriteScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _textController = TextEditingController();
-  String? _selectedImage;
-  String _editedBy = 'Wife';
-  Color _selectedColor = Colors.black;
-  double _textSize = 18;
-  TextAlign _textAlign = TextAlign.center;
-  bool _hasShadow = true;
-  bool _isBold = false;
-  bool _isItalic = false;
-  double _textRotation = 0;
-  String? _selectedFilter = 'None';
-  Offset _textPosition = const Offset(0, 0);
-  bool _isPreviewMode = false;
-  bool _isFormattingExpanded = true;
-  final ChangeStack _undoStack = ChangeStack();
-  final ImagePicker _picker = ImagePicker();
-  final List<String> _backgroundImages = List.generate(
-    10,
-        (index) => 'assets/images/status/status-${index + 1}.png',
-  );
+class _WriteScreenState extends State<WriteScreen> {
+  File? _selectedImage;
+  String? _selectedAssetImage;
+  final List<String> _preloadedImages = [
+    'assets/images/status/status-1.png',
+    'assets/images/status/status-2.png',
+    'assets/images/status/status-3.png',
+    'assets/images/status/status-4.png',
+    'assets/images/status/status-5.png',
+    'assets/images/status/status-6.png',
+    'assets/images/status/status-7.png',
+    'assets/images/status/status-8.png',
+    'assets/images/status/status-9.png',
+    'assets/images/status/status-10.png',
+  ];
+  String _memoryName = '';
+  String _editedBy = '';
+  String _language = 'English';
+  double _fontSize = 16.0;
+  Offset _textPosition = const Offset(50, 50);
+  final GlobalKey _repaintBoundaryKey = GlobalKey(); // For preview
+  final GlobalKey _saveBoundaryKey = GlobalKey(); // For saving
+  List<WordStyle> _wordStyles = [];
+  TextAlign _textAlign = TextAlign.left;
+  bool _isSharing = false;
 
   TextDirection _getTextDirection(String text) {
-    return text.contains(RegExp(r'[\u0600-\u06FF]')) ? TextDirection.rtl : TextDirection.ltr;
+    return text.contains(RegExp(r'[\u0600-\u06FF]')) || _language == 'Urdu'
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+        _selectedAssetImage = null;
+      });
+    }
+  }
+
+  Future<void> _saveImage() async {
+    if (_selectedImage == null && _selectedAssetImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image first'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final boundary = _saveBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception('Failed to capture image: Render boundary is null');
+      }
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: dart_ui.ImageByteFormat.png);
+      if (byteData == null) {
+        throw Exception('Failed to capture image: Image data is null');
+      }
+      final buffer = byteData.buffer.asUint8List();
+
+      final directory = await getApplicationDocumentsDirectory();
+      final memoryDir = Directory('${directory.path}/memories');
+      if (!await memoryDir.exists()) {
+        await memoryDir.create(recursive: true);
+      }
+
+      final timestamp = DateTime.now().toIso8601String();
+      final sanitizedMemoryName = _memoryName.isNotEmpty ? _memoryName.replaceAll(RegExp(r'[^\w\s-]'), '_') : 'memory';
+      final fileName = '${sanitizedMemoryName}_$timestamp.png';
+      final file = File('${memoryDir.path}/$fileName');
+      await file.writeAsBytes(buffer);
+
+      // Save metadata to memories_metadata.json
+      final metadataFile = File('${directory.path}/memories_metadata.json');
+      List<Map<String, dynamic>> metadataList = [];
+      if (await metadataFile.exists()) {
+        final metadataJson = await metadataFile.readAsString();
+        metadataList = (jsonDecode(metadataJson) as List).cast<Map<String, dynamic>>();
+      }
+
+      metadataList.add({
+        'name': _memoryName.isNotEmpty ? _memoryName : 'Memory',
+        'date': timestamp,
+        'imagePath': file.path,
+        'editedBy': _editedBy.isNotEmpty ? _editedBy : 'Unknown',
+      });
+
+      await metadataFile.writeAsString(jsonEncode(metadataList));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Saved to ${memoryDir.path}',
+            style: GoogleFonts.montserrat(color: Colors.white),
+          ),
+          backgroundColor: Colors.black,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error saving: $e',
+            style: GoogleFonts.montserrat(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _shareImage() async {
+    if (_selectedImage == null && _selectedAssetImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an image first'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSharing = true;
+    });
+
+    try {
+      final boundary = _repaintBoundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception('Failed to share image: Render boundary is null');
+      }
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: dart_ui.ImageByteFormat.png);
+      if (byteData == null) {
+        throw Exception('Failed to share image: Image data is null');
+      }
+      final buffer = byteData.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/memory_${DateTime.now().millisecondsSinceEpoch}.png')
+          .writeAsBytes(buffer);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: _memoryName.isNotEmpty ? _memoryName : 'Created with Amora',
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error sharing: $e',
+            style: GoogleFonts.montserrat(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isSharing = false;
+      });
+    }
   }
 
   void _resetTextPosition() {
     setState(() {
-      _textPosition = const Offset(0, 0);
+      _textPosition = const Offset(50, 50);
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Text position reset to center', style: GoogleFonts.montserrat())),
-    );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _textController.addListener(_saveState);
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _textController.removeListener(_saveState);
-    _textController.dispose();
-    super.dispose();
-  }
-
-  void _saveState() {
-    _undoStack.add(Change(
-      _textController.text,
-          () => _textController.text = _textController.text,
-          (oldValue) => _textController.text = oldValue,
-    ));
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Picking image...', style: GoogleFonts.montserrat())),
-    );
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final amoraDir = Directory('${directory.path}/memories/amora_images');
-      if (!await amoraDir.exists()) {
-        await amoraDir.create(recursive: true);
-      }
-      final fileName = 'temp_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final savedImage = await File(pickedFile.path).copy('${amoraDir.path}/$fileName');
-      setState(() {
-        _selectedImage = savedImage.path;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Image selected!', style: GoogleFonts.montserrat())),
-      );
-    }
-  }
-
-  Future<void> _saveMemory() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Saving memory...', style: GoogleFonts.montserrat())),
-    );
-    if (_formKey.currentState!.validate() && _selectedImage != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final amoraDir = Directory('${directory.path}/memories/amora_images');
-      if (!await amoraDir.exists()) {
-        await amoraDir.create(recursive: true);
-      }
-
-      final imageFile = File(_selectedImage!);
-      final imageBytes = await imageFile.readAsBytes();
-      img.Image? image = img.decodeImage(imageBytes);
-      if (image == null) {
-        debugPrint('Failed to decode image: $_selectedImage');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load image', style: GoogleFonts.montserrat())),
-        );
-        return;
-      }
-
-      if (_selectedFilter == 'Sepia') {
-        image = img.sepia(image);
-      } else if (_selectedFilter == 'Grayscale') {
-        image = img.grayscale(image);
-      }
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final imageWidth = image.width.toDouble();
-      final imageHeight = image.height.toDouble();
-      final codec = await ui.instantiateImageCodec(img.encodeJpg(image));
-      final frame = await codec.getNextFrame();
-      canvas.drawImage(frame.image, Offset.zero, Paint());
-
-      final textSpan = TextSpan(
-        text: _textController.text,
-        style: GoogleFonts.montserrat(
-          fontSize: _textSize,
-          color: _selectedColor,
-          fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-          fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-          shadows: _hasShadow
-              ? [
-            Shadow(
-              blurRadius: 4,
-              color: AppTheme.roseGold.withOpacity(0.5),
-              offset: const Offset(1, 1),
-            ),
-          ]
-              : null,
-        ),
-      );
-      final textPainter = TextPainter(
-        text: textSpan,
-        textAlign: _textAlign,
-        textDirection: _getTextDirection(_textController.text),
-      );
-      textPainter.layout(maxWidth: imageWidth * 0.8);
-      canvas.translate(_textPosition.dx + imageWidth / 2, _textPosition.dy + imageHeight / 2);
-      canvas.rotate(_textRotation * 3.14159 / 180);
-      textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
-
-      final picture = recorder.endRecording();
-      final uiImage = await picture.toImage(image.width, image.height);
-      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) {
-        debugPrint('Failed to convert image to bytes');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save image', style: GoogleFonts.montserrat())),
-        );
-        return;
-      }
-      final fileName = 'memory_${DateTime.now().millisecondsSinceEpoch}.png';
-      final savedImage = File('${amoraDir.path}/$fileName');
-      await savedImage.writeAsBytes(byteData.buffer.asUint8List());
-      debugPrint('Image saved to: ${savedImage.path}');
-
-      final metadataFile = File('${directory.path}/memories_metadata.json');
-      List<MemoryMetadata> metadataList = [];
-      if (await metadataFile.exists()) {
-        try {
-          final metadataJson = await metadataFile.readAsString();
-          metadataList = (jsonDecode(metadataJson) as List)
-              .map((item) => MemoryMetadata.fromJson(item))
-              .toList();
-        } catch (e) {
-          debugPrint('Error reading metadata: $e');
-        }
-      }
-      final metadata = MemoryMetadata(
-        name: _nameController.text,
-        date: DateTime.now().toIso8601String(),
-        imagePath: savedImage.path,
-        editedBy: _editedBy,
-      );
-      metadataList.add(metadata);
-      try {
-        await metadataFile.writeAsString(jsonEncode(metadataList));
-        debugPrint('Metadata saved to: ${metadataFile.path}');
-      } catch (e) {
-        debugPrint('Error writing metadata: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save metadata', style: GoogleFonts.montserrat())),
-        );
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Memory saved!', style: GoogleFonts.montserrat())),
-      );
-      Navigator.pushReplacementNamed(context, '/main', arguments: widget.email);
-    } else {
-      debugPrint('Save failed: Invalid form or no image selected');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select an image and fill all fields', style: GoogleFonts.montserrat())),
-      );
-    }
-  }
-
-  Future<void> _shareMemory() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Sharing memory...', style: GoogleFonts.montserrat())),
-    );
-    if (_selectedImage != null) {
-      final directory = await getApplicationDocumentsDirectory();
-      final tempFile = File('${directory.path}/temp_share.png');
-      final imageFile = File(_selectedImage!);
-      final imageBytes = await imageFile.readAsBytes();
-      img.Image? image = img.decodeImage(imageBytes);
-      if (image == null) {
-        debugPrint('Failed to decode image for sharing: $_selectedImage');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share image', style: GoogleFonts.montserrat())),
-        );
-        return;
-      }
-
-      if (_selectedFilter == 'Sepia') {
-        image = img.sepia(image);
-      } else if (_selectedFilter == 'Grayscale') {
-        image = img.grayscale(image);
-      }
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final imageWidth = image.width.toDouble();
-      final imageHeight = image.height.toDouble();
-      final codec = await ui.instantiateImageCodec(img.encodeJpg(image));
-      final frame = await codec.getNextFrame();
-      canvas.drawImage(frame.image, Offset.zero, Paint());
-      final textSpan = TextSpan(
-        text: _textController.text,
-        style: GoogleFonts.montserrat(
-          fontSize: _textSize,
-          color: _selectedColor,
-          fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-          fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-          shadows: _hasShadow
-              ? [
-            Shadow(
-              blurRadius: 4,
-              color: AppTheme.roseGold.withOpacity(0.5),
-              offset: const Offset(1, 1),
-            ),
-          ]
-              : null,
-        ),
-      );
-      final textPainter = TextPainter(
-        text: textSpan,
-        textAlign: _textAlign,
-        textDirection: _getTextDirection(_textController.text),
-      );
-      textPainter.layout(maxWidth: imageWidth * 0.8);
-      canvas.translate(_textPosition.dx + imageWidth / 2, _textPosition.dy + imageHeight / 2);
-      canvas.rotate(_textRotation * 3.14159 / 180);
-      textPainter.paint(canvas, Offset(-textPainter.width / 2, -textPainter.height / 2));
-
-      final picture = recorder.endRecording();
-      final uiImage = await picture.toImage(image.width, image.height);
-      final byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) {
-        debugPrint('Failed to convert image to bytes for sharing');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to share image', style: GoogleFonts.montserrat())),
-        );
-        return;
-      }
-      await tempFile.writeAsBytes(byteData.buffer.asUint8List());
-
-      await Share.shareXFiles([XFile(tempFile.path)], text: 'A memory from Amora: ${_nameController.text}');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Memory shared!', style: GoogleFonts.montserrat())),
-      );
-    }
+  void _updateWordStyles(List<WordStyle> newStyles) {
+    setState(() {
+      _wordStyles = newStyles;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final fontScaleFactor = screenWidth > 600 ? 1.2 : 0.85;
-    final verticalSpacing = screenHeight * 0.015;
+    final screenSize = MediaQuery.of(context).size;
+    final isMobile = screenSize.width < 600;
+    final isTablet = screenSize.width >= 600 && screenSize.width < 1200;
 
     return Scaffold(
       backgroundColor: AppTheme.creamWhite,
-      body: Container(
-        constraints: const BoxConstraints.expand(),
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/backgrounds/bg-6.jpg'),
-            fit: BoxFit.cover,
-            opacity: 0.3,
+      body: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                AppTheme.creamWhite,
+                AppTheme.softPink.withOpacity(0.4),
+                AppTheme.roseGold.withOpacity(0.2),
+              ],
+              stops: const [0.0, 0.7, 1.0],
+            ),
+            image: const DecorationImage(
+              image: AssetImage('assets/images/backgrounds/bg-8.jpg'),
+              fit: BoxFit.cover,
+              opacity: 0.3,
+            ),
+          ),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: isMobile ? 16 : isTablet ? 24 : 32,
+              vertical: 16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildHeaderSection(isMobile, isTablet),
+                const SizedBox(height: 16),
+                if (isMobile) _buildMobileLayout() else _buildTabletDesktopLayout(isTablet),
+                _buildImagePreviewSection(screenSize, isMobile),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
-        child: SingleChildScrollView(
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.all(screenWidth * 0.04),
+      ),
+    );
+  }
+
+  Widget _buildHeaderSection(bool isMobile, bool isTablet) {
+    return Column(
+      children: [
+        Text(
+          'Mobahat Nama',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 24 : isTablet ? 28 : 32,
+            color: AppTheme.deepRose,
+            fontWeight: FontWeight.w700,
+            shadows: [
+              Shadow(
+                blurRadius: 4,
+                color: AppTheme.roseGold.withOpacity(0.3),
+                offset: const Offset(2, 2),
+              ),
+            ],
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.favorite,
+              size: isMobile ? 20 : 24,
+              color: AppTheme.roseGold,
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Divider(
+                color: AppTheme.roseGold,
+                thickness: 1.5,
+                height: 1,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Icon(
+              Icons.favorite,
+              size: isMobile ? 20 : 24,
+              color: AppTheme.roseGold,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        _buildInputField(
+          label: 'Memory Name',
+          onChanged: (value) => setState(() => _memoryName = value),
+          isMobile: true,
+        ),
+        const SizedBox(height: 12),
+        _buildInputField(
+          label: 'Edited By',
+          onChanged: (value) => setState(() => _editedBy = value),
+          isMobile: true,
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildLanguageDropdown(true)),
+            const SizedBox(width: 12),
+            Expanded(child: _buildTextAlignToggle(true)),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildFontSizeSlider(true),
+        const SizedBox(height: 16),
+        if (_wordStyles.isNotEmpty) _buildWordStylingInfo(true),
+        const SizedBox(height: 16),
+        _buildActionButtons(true),
+        const SizedBox(height: 16),
+        _buildPreloadedImagesSection(true),
+      ],
+    );
+  }
+
+  Widget _buildTabletDesktopLayout(bool isTablet) {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 2,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    constraints: BoxConstraints(
-                      maxHeight: screenHeight * 0.25,
-                      maxWidth: screenWidth * 0.85,
-                    ),
+                  _buildInputField(
+                    label: 'Memory Name',
+                    onChanged: (value) => setState(() => _memoryName = value),
+                    isMobile: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildInputField(
+                    label: 'Edited By',
+                    onChanged: (value) => setState(() => _editedBy = value),
+                    isMobile: false,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(child: _buildLanguageDropdown(false)),
+                      const SizedBox(width: 16),
+                      Expanded(child: _buildTextAlignToggle(false)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFontSizeSlider(false),
+                  const SizedBox(height: 16),
+                  if (_wordStyles.isNotEmpty) _buildWordStylingInfo(false),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _buildActionButtons(false),
+        const SizedBox(height: 16),
+        _buildPreloadedImagesSection(false),
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required Function(String) onChanged,
+    required bool isMobile,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : 16,
+        vertical: isMobile ? 8 : 12,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.roseGold, width: 1.5),
+        color: AppTheme.creamWhite.withOpacity(0.85),
+      ),
+      child: TextField(
+        onChanged: onChanged,
+        style: GoogleFonts.montserrat(
+          fontSize: isMobile ? 14 : 16,
+          color: AppTheme.vintageSepia,
+        ),
+        textDirection: _getTextDirection(label),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+          ),
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLanguageDropdown(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Language',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        DropdownButton<String>(
+          isExpanded: true,
+          value: _language,
+          items: ['English', 'Urdu'].map((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: GoogleFonts.montserrat(
+                  fontSize: isMobile ? 14 : 16,
+                  color: AppTheme.vintageSepia,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) => setState(() => _language = value!),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextAlignToggle(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Text Alignment',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        ToggleButtons(
+          isSelected: [
+            _textAlign == TextAlign.left,
+            _textAlign == TextAlign.center,
+            _textAlign == TextAlign.right,
+          ],
+          onPressed: (index) {
+            setState(() {
+              _textAlign = index == 0
+                  ? TextAlign.left
+                  : index == 1
+                  ? TextAlign.center
+                  : TextAlign.right;
+            });
+          },
+          children: [
+            Icon(Icons.format_align_left, size: isMobile ? 20 : 24),
+            Icon(Icons.format_align_center, size: isMobile ? 20 : 24),
+            Icon(Icons.format_align_right, size: isMobile ? 20 : 24),
+          ],
+          borderRadius: BorderRadius.circular(8),
+          selectedColor: AppTheme.roseGold,
+          fillColor: AppTheme.softPink.withOpacity(0.2),
+          constraints: BoxConstraints(
+            minHeight: isMobile ? 36 : 48,
+            minWidth: isMobile ? 36 : 48,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFontSizeSlider(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Font Size: ${_fontSize.round()}',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Slider(
+          value: _fontSize,
+          min: 12,
+          max: 32,
+          onChanged: (value) => setState(() => _fontSize = value),
+          activeColor: AppTheme.roseGold,
+          inactiveColor: AppTheme.softPink,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWordStylingInfo(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Word Styling:',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Tap on words in the preview to change their color',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 12 : 14,
+            color: AppTheme.vintageSepia,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons(bool isMobile) {
+    return Wrap(
+      spacing: isMobile ? 8 : 12,
+      runSpacing: isMobile ? 8 : 12,
+      alignment: WrapAlignment.center,
+      children: [
+        _buildActionButton(
+          icon: Icons.photo,
+          label: 'Pick Image',
+          onPressed: _pickImage,
+          isMobile: isMobile,
+          backgroundColor: AppTheme.deepRose,
+        ),
+        _buildActionButton(
+          icon: Icons.save,
+          label: 'Save',
+          onPressed: _saveImage,
+          isMobile: isMobile,
+        ),
+        _buildActionButton(
+          icon: Icons.share,
+          label: _isSharing ? 'Sharing...' : 'Share',
+          onPressed: _isSharing ? null : _shareImage,
+          isMobile: isMobile,
+          backgroundColor: Colors.green,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback? onPressed,
+    required bool isMobile,
+    Color? backgroundColor,
+  }) {
+    return ElevatedButton.icon(
+      icon: Icon(icon, size: isMobile ? 18 : 20),
+      label: Text(
+        label,
+        style: GoogleFonts.montserrat(
+          fontSize: isMobile ? 12 : 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor ?? AppTheme.roseGold,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 12 : 16,
+          vertical: isMobile ? 10 : 12,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 2,
+      ),
+    );
+  }
+
+  Widget _buildPreloadedImagesSection(bool isMobile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Preloaded Images:',
+          style: GoogleFonts.montserrat(
+            fontSize: isMobile ? 14 : 16,
+            color: AppTheme.deepRose.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: isMobile ? 90 : 110,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _preloadedImages.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedAssetImage = _preloadedImages[index];
+                    _selectedImage = null;
+                  });
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(isMobile ? 4 : 6),
+                  child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppTheme.roseGold, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.softPink.withOpacity(0.3),
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
+                      border: Border.all(
+                        color: _selectedAssetImage == _preloadedImages[index]
+                            ? AppTheme.deepRose
+                            : AppTheme.roseGold,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(6),
                       child: Image.asset(
-                        'assets/images/write.jpg',
+                        _preloadedImages[index],
+                        width: isMobile ? 70 : 90,
+                        height: isMobile ? 90 : 110,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          print('Error loading image: $error');
                           return Container(
+                            width: isMobile ? 70 : 90,
+                            height: isMobile ? 90 : 110,
                             color: AppTheme.softPink.withOpacity(0.2),
                             child: Icon(
-                              Icons.favorite,
-                              size: screenWidth * 0.15,
+                              Icons.image,
+                              size: isMobile ? 24 : 28,
                               color: AppTheme.roseGold,
                             ),
                           );
@@ -389,646 +674,362 @@ class WriteScreenState extends State<WriteScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: verticalSpacing * 2),
-                  Directionality(
-                    textDirection: _getTextDirection('Write Your Heart'),
-                    child: Text(
-                      'Write Your Heart',
-                      style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontSize: 26 * fontScaleFactor,
-                        color: AppTheme.deepRose,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 3,
-                            color: AppTheme.roseGold.withOpacity(0.3),
-                            offset: const Offset(1, 1),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: verticalSpacing * 2),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        CustomTextField(
-                          label: 'Memory Name',
-                          controller: _nameController,
-                          prefixIcon: Icon(Icons.edit, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a memory name';
-                            }
-                            return null;
-                          },
-                        ),
-                        SizedBox(height: verticalSpacing),
-                        DropdownButton<String>(
-                          value: _editedBy,
-                          items: ['Wife', 'Husband']
-                              .map((role) => DropdownMenuItem(value: role, child: Text(role, style: GoogleFonts.montserrat())))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _editedBy = value!;
-                            });
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Role set to $value', style: GoogleFonts.montserrat())),
-                            );
-                          },
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16 * fontScaleFactor,
-                            color: AppTheme.deepRose,
-                          ),
-                          dropdownColor: AppTheme.creamWhite,
-                        ),
-                        SizedBox(height: verticalSpacing),
-                        if (!_isPreviewMode) ...[
-                          Image.asset(
-                            'assets/images/misc/floral-divider.png',
-                            width: screenWidth * 0.8,
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          Directionality(
-                            textDirection: _getTextDirection('Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}'),
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _isFormattingExpanded = !_isFormattingExpanded;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      _isFormattingExpanded ? 'Formatting expanded' : 'Formatting collapsed',
-                                      style: GoogleFonts.montserrat(),
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Text(
-                                'Text Formatting ${_isFormattingExpanded ? '▼' : '▲'}',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16 * fontScaleFactor,
-                                  color: AppTheme.roseGold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: verticalSpacing),
-                          if (_isFormattingExpanded) ...[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.format_bold,
-                                    color: _isBold ? AppTheme.roseGold : AppTheme.deepRose,
-                                    size: 20 * fontScaleFactor,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isBold = !_isBold;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Bold ${_isBold ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    Icons.format_italic,
-                                    color: _isItalic ? AppTheme.roseGold : AppTheme.deepRose,
-                                    size: 20 * fontScaleFactor,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isItalic = !_isItalic;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Italic ${_isItalic ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    _hasShadow ? Icons.format_color_text : Icons.format_color_reset,
-                                    color: AppTheme.roseGold,
-                                    size: 20 * fontScaleFactor,
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _hasShadow = !_hasShadow;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Shadow ${_hasShadow ? 'enabled' : 'disabled'}', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.format_align_left, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: () {
-                                    setState(() {
-                                      _textAlign = TextAlign.left;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Text aligned left', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.format_align_center, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: () {
-                                    setState(() {
-                                      _textAlign = TextAlign.center;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Text aligned center', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.format_align_right, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: () {
-                                    setState(() {
-                                      _textAlign = TextAlign.right;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Text aligned right', style: GoogleFonts.montserrat())),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Directionality(
-                                  textDirection: _getTextDirection('Text Size: ${_textSize.round()}'),
-                                  child: Text(
-                                    'Text Size: ${_textSize.round()}',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 14 * fontScaleFactor,
-                                      color: AppTheme.deepRose,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Slider(
-                                  value: _textSize,
-                                  min: 12,
-                                  max: 36,
-                                  divisions: 24,
-                                  label: _textSize.round().toString(),
-                                  activeColor: AppTheme.roseGold,
-                                  inactiveColor: AppTheme.softPink,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _textSize = value;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Directionality(
-                                  textDirection: _getTextDirection('Rotation: ${_textRotation.round()}°'),
-                                  child: Text(
-                                    'Rotation: ${_textRotation.round()}°',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 14 * fontScaleFactor,
-                                      color: AppTheme.deepRose,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Slider(
-                                  value: _textRotation,
-                                  min: 0,
-                                  max: 360,
-                                  divisions: 360,
-                                  label: _textRotation.round().toString(),
-                                  activeColor: AppTheme.roseGold,
-                                  inactiveColor: AppTheme.softPink,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _textRotation = value;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Wrap(
-                              spacing: 10,
-                              children: [
-                                ChoiceChip(
-                                  label: Text('Black', style: GoogleFonts.montserrat(color: Colors.white)),
-                                  selected: _selectedColor == Colors.black,
-                                  selectedColor: AppTheme.roseGold,
-                                  backgroundColor: Colors.black,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() => _selectedColor = Colors.black);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Color set to Black', style: GoogleFonts.montserrat())),
-                                      );
-                                    }
-                                  },
-                                ),
-                                ChoiceChip(
-                                  label: Text('White', style: GoogleFonts.montserrat(color: Colors.black)),
-                                  selected: _selectedColor == Colors.white,
-                                  selectedColor: AppTheme.roseGold,
-                                  backgroundColor: Colors.white,
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() => _selectedColor = Colors.white);
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Color set to White', style: GoogleFonts.montserrat())),
-                                      );
-                                    }
-                                  },
-                                ),
-                                ChoiceChip(
-                                  label: Text('Blush Pink', style: GoogleFonts.montserrat(color: Colors.black)),
-                                  selected: _selectedColor == const Color(0xFFFFB6C1),
-                                  selectedColor: AppTheme.roseGold,
-                                  backgroundColor: const Color(0xFFFFB6C1),
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() => _selectedColor = const Color(0xFFFFB6C1));
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Color set to Blush Pink', style: GoogleFonts.montserrat())),
-                                      );
-                                    }
-                                  },
-                                ),
-                                ChoiceChip(
-                                  label: Text('Burgundy', style: GoogleFonts.montserrat(color: Colors.white)),
-                                  selected: _selectedColor == const Color(0xFF800020),
-                                  selectedColor: AppTheme.roseGold,
-                                  backgroundColor: const Color(0xFF800020),
-                                  onSelected: (selected) {
-                                    if (selected) {
-                                      setState(() => _selectedColor = const Color(0xFF800020));
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text('Color set to Burgundy', style: GoogleFonts.montserrat())),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            DropdownButton<String>(
-                              value: _selectedFilter,
-                              items: ['None', 'Sepia', 'Grayscale']
-                                  .map((filter) => DropdownMenuItem(value: filter, child: Text(filter, style: GoogleFonts.montserrat())))
-                                  .toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedFilter = value!;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Filter set to $value', style: GoogleFonts.montserrat())),
-                                );
-                              },
-                              style: GoogleFonts.montserrat(
-                                fontSize: 16 * fontScaleFactor,
-                                color: AppTheme.deepRose,
-                              ),
-                              dropdownColor: AppTheme.creamWhite,
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                IconButton(
-                                  icon: Icon(Icons.undo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: _undoStack.canUndo
-                                      ? () {
-                                    setState(() {
-                                      _undoStack.undo();
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Undo', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                      : null,
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.redo, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: _undoStack.canRedo
-                                      ? () {
-                                    setState(() {
-                                      _undoStack.redo();
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Redo', style: GoogleFonts.montserrat())),
-                                    );
-                                  }
-                                      : null,
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.preview, color: AppTheme.roseGold, size: 20 * fontScaleFactor),
-                                  onPressed: () {
-                                    setState(() {
-                                      _isPreviewMode = !_isPreviewMode;
-                                    });
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          _isPreviewMode ? 'Preview mode enabled' : 'Preview mode disabled',
-                                          style: GoogleFonts.montserrat(),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: verticalSpacing),
-                            Image.asset(
-                              'assets/images/misc/floral-divider.png',
-                              width: screenWidth * 0.8,
-                            ),
-                            SizedBox(height: verticalSpacing),
-                          ],
-                        ],
-                        SizedBox(height: verticalSpacing),
-                        ElevatedButton(
-                          onPressed: _pickImageFromGallery,
-                          child: Text(
-                            'Pick from Gallery',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 16 * fontScaleFactor,
-                              color: AppTheme.creamWhite,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: verticalSpacing),
-                        SizedBox(
-                          height: screenHeight * 0.1,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: _backgroundImages.length,
-                            itemBuilder: (context, index) {
-                              final image = _backgroundImages[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedImage = image;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Background image selected', style: GoogleFonts.montserrat())),
-                                  );
-                                },
-                                child: Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 5),
-                                  width: screenWidth * 0.2,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: _selectedImage == image ? AppTheme.roseGold : Colors.transparent,
-                                      width: 1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Image.asset(
-                                    image,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      print('Error loading image: $error');
-                                      return const Icon(Icons.error, color: AppTheme.roseGold);
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(height: verticalSpacing),
-                        if (_selectedImage != null)
-                          Container(
-                            constraints: BoxConstraints(
-                              maxHeight: screenHeight * 0.5,
-                              maxWidth: screenWidth * 0.95,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppTheme.roseGold, width: 1.5),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  ColorFiltered(
-                                    colorFilter: _selectedFilter == 'Sepia'
-                                        ? const ColorFilter.matrix([
-                                      0.393, 0.769, 0.189, 0, 0,
-                                      0.349, 0.686, 0.168, 0, 0,
-                                      0.272, 0.534, 0.131, 0, 0,
-                                      0, 0, 0, 1, 0,
-                                    ])
-                                        : _selectedFilter == 'Grayscale'
-                                        ? const ColorFilter.matrix([
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0.2126, 0.7152, 0.0722, 0, 0,
-                                      0, 0, 0, 1, 0,
-                                    ])
-                                        : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                                    child: _selectedImage!.startsWith('assets/')
-                                        ? Image.asset(
-                                      _selectedImage!,
-                                      fit: BoxFit.contain,
-                                      width: screenWidth * 0.95,
-                                      height: screenHeight * 0.5,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        print('Error loading image: $error');
-                                        return const Icon(Icons.error, color: AppTheme.roseGold);
-                                      },
-                                    )
-                                        : Image.file(
-                                      File(_selectedImage!),
-                                      fit: BoxFit.contain,
-                                      width: screenWidth * 0.95,
-                                      height: screenHeight * 0.5,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        print('Error loading image: $error');
-                                        return const Icon(Icons.error, color: AppTheme.roseGold);
-                                      },
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: _textPosition.dx + screenWidth * 0.475,
-                                    top: _textPosition.dy + screenHeight * 0.25,
-                                    child: _isPreviewMode
-                                        ? Transform.rotate(
-                                      angle: _textRotation * 3.14159 / 180,
-                                      child: Directionality(
-                                        textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
-                                        child: Text(
-                                          _textController.text.isEmpty ? 'Your Text' : _textController.text,
-                                          textAlign: _textAlign,
-                                          textDirection: _getTextDirection(_textController.text.isEmpty ? 'Your Text' : _textController.text),
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: _textSize,
-                                            color: _selectedColor,
-                                            fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-                                            fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-                                            shadows: _hasShadow
-                                                ? [
-                                              Shadow(
-                                                blurRadius: 4,
-                                                color: AppTheme.roseGold.withOpacity(0.5),
-                                                offset: const Offset(1, 1),
-                                              ),
-                                            ]
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                        : GestureDetector(
-                                      onPanUpdate: (details) {
-                                        setState(() {
-                                          final newX = _textPosition.dx + details.delta.dx;
-                                          final newY = _textPosition.dy + details.delta.dy;
-                                          final maxWidth = screenWidth * 0.95 / 2;
-                                          final maxHeight = screenHeight * 0.5 / 2;
-                                          _textPosition = Offset(
-                                            newX.clamp(-maxWidth, maxWidth),
-                                            newY.clamp(-maxHeight, maxHeight),
-                                          );
-                                        });
-                                      },
-                                      onDoubleTap: _resetTextPosition,
-                                      child: Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: screenWidth * 0.8,
-                                          minWidth: screenWidth * 0.3,
-                                          minHeight: screenHeight * 0.05,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: AppTheme.roseGold, width: 1.5),
-                                          borderRadius: BorderRadius.circular(12),
-                                          color: AppTheme.creamWhite.withOpacity(0.8),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: AppTheme.softPink.withOpacity(0.3),
-                                              blurRadius: 6,
-                                              spreadRadius: 1,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: screenWidth * 0.03,
-                                          vertical: screenHeight * 0.015,
-                                        ),
-                                        child: Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            Transform.rotate(
-                                              angle: _textRotation * 3.14159 / 180,
-                                              child: TextField(
-                                                controller: _textController,
-                                                textAlign: _textAlign,
-                                                style: GoogleFonts.montserrat(
-                                                  fontSize: _textSize,
-                                                  color: _selectedColor,
-                                                  fontWeight: _isBold ? FontWeight.bold : FontWeight.normal,
-                                                  fontStyle: _isItalic ? FontStyle.italic : FontStyle.normal,
-                                                  shadows: _hasShadow
-                                                      ? [
-                                                    Shadow(
-                                                      blurRadius: 4,
-                                                      color: AppTheme.roseGold.withOpacity(0.5),
-                                                      offset: const Offset(1, 1),
-                                                    ),
-                                                  ]
-                                                      : null,
-                                                ),
-                                                decoration: InputDecoration(
-                                                  hintText: 'Your Text',
-                                                  hintStyle: GoogleFonts.montserrat(
-                                                    color: AppTheme.roseGold.withOpacity(0.5),
-                                                    fontSize: _textSize,
-                                                  ),
-                                                  border: InputBorder.none,
-                                                ),
-                                                textDirection: _getTextDirection(_textController.text),
-                                                maxLines: null,
-                                                maxLength: 200,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              bottom: 2,
-                                              right: 2,
-                                              child: Icon(
-                                                Icons.drag_indicator,
-                                                color: AppTheme.roseGold,
-                                                size: 24 * fontScaleFactor,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        SizedBox(height: verticalSpacing),
-                        Row(
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePreviewSection(Size screenSize, bool isMobile) {
+    final previewWidth = isMobile ? screenSize.width * 0.9 : screenSize.width * 0.85;
+    final previewHeight = isMobile ? screenSize.height * 0.35 : screenSize.height * 0.4;
+
+    return Container(
+      height: previewHeight,
+      constraints: BoxConstraints(maxWidth: previewWidth),
+      margin: const EdgeInsets.only(top: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.roseGold, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.softPink.withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 2,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Stack(
+          children: [
+            // Saving layer (excludes TextField)
+            RepaintBoundary(
+              key: _saveBoundaryKey,
+              child: Stack(
+                children: [
+                  if (_selectedImage != null)
+                    Image.file(
+                      _selectedImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    )
+                  else if (_selectedAssetImage != null)
+                    Image.asset(
+                      _selectedAssetImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    )
+                  else
+                    Container(
+                      color: AppTheme.softPink.withOpacity(0.2),
+                      child: Center(
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ElevatedButton(
-                              onPressed: _saveMemory,
-                              child: Text(
-                                'Save',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16 * fontScaleFactor,
-                                  color: AppTheme.creamWhite,
-                                ),
-                              ),
+                            Icon(
+                              Icons.image,
+                              size: isMobile ? 40 : 50,
+                              color: AppTheme.roseGold,
                             ),
-                            const SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: _shareMemory,
-                              child: Text(
-                                'Share',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 16 * fontScaleFactor,
-                                  color: AppTheme.creamWhite,
-                                ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Select an image to begin',
+                              style: GoogleFonts.montserrat(
+                                color: AppTheme.deepRose,
+                                fontSize: isMobile ? 14 : 16,
                               ),
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
+                  if (_wordStyles.isNotEmpty)
+                    TextOverlayEditor(
+                      wordStyles: _wordStyles,
+                      onTextChanged: _updateWordStyles,
+                      onWordTapped: _onWordTapped,
+                      fontSize: _fontSize,
+                      textAlign: _textAlign,
+                      textDirection: _getTextDirection(
+                        _wordStyles.map((ws) => ws.word).join(' '),
+                      ),
+                      textPosition: _textPosition,
+                      onPositionChanged: (newPosition) {
+                        setState(() {
+                          _textPosition = newPosition;
+                        });
+                      },
+                      resetTextPosition: _resetTextPosition,
+                      isPreviewMode: true, // For saving
+                    ),
+                ],
+              ),
+            ),
+            // Preview layer (includes TextField)
+            RepaintBoundary(
+              key: _repaintBoundaryKey,
+              child: Stack(
+                children: [
+                  if (_selectedImage != null)
+                    Image.file(
+                      _selectedImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    )
+                  else if (_selectedAssetImage != null)
+                    Image.asset(
+                      _selectedAssetImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  TextOverlayEditor(
+                    wordStyles: _wordStyles,
+                    onTextChanged: _updateWordStyles,
+                    onWordTapped: _onWordTapped,
+                    fontSize: _fontSize,
+                    textAlign: _textAlign,
+                    textDirection: _getTextDirection(
+                      _wordStyles.map((ws) => ws.word).join(' '),
+                    ),
+                    textPosition: _textPosition,
+                    onPositionChanged: (newPosition) {
+                      setState(() {
+                        _textPosition = newPosition;
+                      });
+                    },
+                    resetTextPosition: _resetTextPosition,
+                    isPreviewMode: false, // For editing
                   ),
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
+    );
+  }
+
+  Future<void> _onWordTapped(int index) async {
+    final Color? pickedColor = await showDialog<Color>(
+      context: context,
+      builder: (context) => _ColorPickerDialog(
+        currentColor: _wordStyles[index].color,
+      ),
+    );
+    if (pickedColor != null) {
+      setState(() {
+        _wordStyles[index] = WordStyle(_wordStyles[index].word, pickedColor);
+      });
+    }
+  }
+}
+
+// TextOverlayEditor widget with individual word coloring
+class TextOverlayEditor extends StatelessWidget {
+  final List<WordStyle> wordStyles;
+  final Function(List<WordStyle>) onTextChanged;
+  final Function(int) onWordTapped;
+  final double fontSize;
+  final TextAlign textAlign;
+  final TextDirection textDirection;
+  final Offset textPosition;
+  final Function(Offset) onPositionChanged;
+  final VoidCallback resetTextPosition;
+  final bool isPreviewMode;
+
+  const TextOverlayEditor({
+    super.key,
+    required this.wordStyles,
+    required this.onTextChanged,
+    required this.onWordTapped,
+    required this.fontSize,
+    required this.textAlign,
+    required this.textDirection,
+    required this.textPosition,
+    required this.onPositionChanged,
+    required this.resetTextPosition,
+    required this.isPreviewMode,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final previewWidth = MediaQuery.of(context).size.width * 0.9;
+    final previewHeight = MediaQuery.of(context).size.height * 0.35;
+
+    return Stack(
+      children: [
+        if (!isPreviewMode)
+          Positioned(
+            left: textPosition.dx,
+            top: textPosition.dy,
+            child: GestureDetector(
+              onPanUpdate: (details) {
+                onPositionChanged(
+                  Offset(
+                    (textPosition.dx + details.delta.dx).clamp(0, previewWidth - 200),
+                    (textPosition.dy + details.delta.dy).clamp(0, previewHeight - 50),
+                  ),
+                );
+              },
+              child: Container(
+                width: 200,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  border: Border.all(color: AppTheme.roseGold),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: TextField(
+                  onChanged: (text) {
+                    final words = text.split(' ').where((w) => w.isNotEmpty).toList();
+                    final newStyles = words.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final word = entry.value;
+                      return WordStyle(
+                        word,
+                        index < wordStyles.length ? wordStyles[index].color : Colors.black,
+                      );
+                    }).toList();
+                    onTextChanged(newStyles);
+                  },
+                  style: GoogleFonts.montserrat(
+                    fontSize: fontSize,
+                    color: Colors.black,
+                  ),
+                  textAlign: textAlign,
+                  textDirection: textDirection,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Enter text',
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (wordStyles.isNotEmpty)
+          Positioned(
+            left: textPosition.dx,
+            top: textPosition.dy,
+            child: Container(
+              width: 200,
+              child: GestureDetector(
+                behavior: isPreviewMode ? HitTestBehavior.opaque : HitTestBehavior.translucent,
+                onTap: isPreviewMode
+                    ? null
+                    : () {
+                  // Approximate word tapping (simplified, improve with TextPainter if needed)
+                  final text = wordStyles.map((ws) => ws.word).join(' ');
+                  final words = text.split(' ');
+                  // For simplicity, assume tap selects the first word (index 0)
+                  // Enhance with TextPainter for precise word bounds if required
+                  if (words.isNotEmpty) {
+                    onWordTapped(0); // Trigger color picker for the first word
+                  }
+                },
+                child: RichText(
+                  text: TextSpan(
+                    children: wordStyles.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final style = entry.value;
+                      return TextSpan(
+                        text: '${style.word} ',
+                        style: GoogleFonts.montserrat(
+                          fontSize: fontSize,
+                          color: style.color,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 2,
+                              color: Colors.black.withOpacity(0.3),
+                              offset: const Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                        recognizer: isPreviewMode
+                            ? null
+                            : (TapGestureRecognizer()..onTap = () => onWordTapped(index)),
+                      );
+                    }).toList(),
+                  ),
+                  textAlign: textAlign,
+                  textDirection: textDirection,
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// Simple color picker dialog
+class _ColorPickerDialog extends StatelessWidget {
+  final Color currentColor;
+
+  const _ColorPickerDialog({required this.currentColor});
+
+  @override
+  Widget build(BuildContext context) {
+    Color selectedColor = currentColor;
+    return AlertDialog(
+      title: Text(
+        'Pick a Color',
+        style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                Colors.black,
+                Colors.white,
+                Colors.red,
+                Colors.blue,
+                Colors.green,
+                Colors.yellow,
+                Colors.purple,
+                Colors.orange,
+              ].map((color) {
+                return GestureDetector(
+                  onTap: () {
+                    selectedColor = color;
+                    Navigator.of(context).pop(color);
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: color == currentColor ? AppTheme.roseGold : Colors.grey,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text('Cancel', style: GoogleFonts.montserrat()),
+        ),
+      ],
     );
   }
 }

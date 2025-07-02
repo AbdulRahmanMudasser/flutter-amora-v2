@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Your romantic color palette -->
+    <color name="soft_pink">#F8E1E9</color>
+    <color name="rose_gold">#B76E79</color>
+    <color name="deep_rose">#8B5A5A</color>
+    <color name="cream_white">#F5F5F5</color>
+    <color name="vintage_sepia">#704214</color>
+
+    <!-- Theme colors -->
+    <color name="primary_color">@color/soft_pink</color>
+    <color name="secondary_color">@color/rose_gold</color>
+    <color name="background_color">@color/cream_white</color>
+    <color name="text_primary">@color/deep_rose</color>
+    <color name="text_secondary">@color/vintage_sepia</color>
+
+    <!-- Additional romantic accents -->
+    <color name="romantic_shadow">#40B76E79</color>
+    <color name="input_field">#33F8E1E9</color>
+</resources>

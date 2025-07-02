@@ -304,7 +304,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Directionality(
           textDirection: _getTextDirection(value),
           child: Text(

@@ -1,6 +1,6 @@
 # 💖 Amora
 
-*A Private Romantic Couple App – Celebrate love, memories, and moments, privately and beautifully.*
+A Private Romantic Couple App – Celebrate love, memories, and moments, privately and beautifully
 
 ---
 

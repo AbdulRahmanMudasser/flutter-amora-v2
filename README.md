@@ -14,7 +14,7 @@ A Private Romantic Couple App – Celebrate love, memories, and moments, private
 ## 🛠️ Tech Stack
 
 - **Flutter** – Cross-platform app development  
-- **Riverpod** – State management  
+- **Riverpod** – State management
 
 ---
 
